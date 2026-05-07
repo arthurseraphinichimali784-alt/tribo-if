@@ -81,6 +81,8 @@ function Dashboard() {
           <Link to="/upload"><Button className="bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow"><Plus className="h-4 w-4 mr-1" /> Novo material</Button></Link>
         </div>
 
+        {stats && <div className="mb-8"><TrustPanel stats={stats} /></div>}
+
         <Tabs defaultValue="materials">
           <TabsList>
             <TabsTrigger value="materials">Meus materiais ({materials.length})</TabsTrigger>
