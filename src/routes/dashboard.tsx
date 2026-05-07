@@ -2,7 +2,9 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/hooks/useUserStats";
 import { Header } from "@/components/Header";
+import { TrustPanel } from "@/components/TrustPanel";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MaterialCard, type MaterialItem } from "@/components/MaterialCard";
@@ -29,13 +31,17 @@ function Dashboard() {
     if (!user) return;
     Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-      supabase.from("materials").select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url").eq("author_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("materials").select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes").eq("author_id", user.id).order("created_at", { ascending: false }),
     ]).then(([p, m]) => {
+      if (p.error) console.error("[dashboard] profile", p.error);
+      if (m.error) console.error("[dashboard] materials", m.error);
       setProfile(p.data);
       setMaterials((m.data ?? []) as any);
       setLoading(false);
     });
   }, [user]);
+
+  const { stats } = useUserStats(user?.id);
 
   const saveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,6 +80,8 @@ function Dashboard() {
           </div>
           <Link to="/upload"><Button className="bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow"><Plus className="h-4 w-4 mr-1" /> Novo material</Button></Link>
         </div>
+
+        {stats && <div className="mb-8"><TrustPanel stats={stats} /></div>}
 
         <Tabs defaultValue="materials">
           <TabsList>

@@ -31,6 +31,7 @@ function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
+  if (authLoading) return null;
   if (!user) return null;
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,10 +64,11 @@ function UploadPage() {
         price: data.price,
         file_path,
       });
-      if (error) throw error;
-      toast.success("Material publicado!");
+      if (error) { console.error("[upload] insert error", error); throw error; }
+      toast.success("✨ Material publicado! +10 XP");
       nav({ to: "/marketplace" });
     } catch (err: any) {
+      console.error("[upload] erro", err);
       toast.error(err.message ?? "Erro ao publicar");
     } finally { setSubmitting(false); }
   };

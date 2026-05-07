@@ -26,13 +26,14 @@ function Marketplace() {
     setLoading(true);
     let query = supabase
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,profiles(username,avatar_url)")
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(60);
     if (subject) query = query.eq("subject", subject as any);
     if (q) query = query.ilike("title", `%${q}%`);
-    query.then(({ data }) => {
+    query.then(({ data, error }) => {
+      if (error) console.error("[marketplace] erro ao buscar materiais", error);
       setItems((data ?? []) as any);
       setLoading(false);
     });

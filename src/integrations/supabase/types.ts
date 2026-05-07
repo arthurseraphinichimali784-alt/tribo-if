@@ -40,6 +40,32 @@ export type Database = {
           },
         ]
       }
+      material_likes: {
+        Row: {
+          created_at: string
+          material_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          material_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          material_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_likes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           author_id: string
@@ -50,12 +76,14 @@ export type Database = {
           downloads: number
           file_path: string | null
           id: string
+          likes: number
           preview_url: string | null
           price: number
           published: boolean
           rating: number
           subject: Database["public"]["Enums"]["subject"]
           title: string
+          trust_score_recebido: number
           type: Database["public"]["Enums"]["material_type"]
         }
         Insert: {
@@ -67,12 +95,14 @@ export type Database = {
           downloads?: number
           file_path?: string | null
           id?: string
+          likes?: number
           preview_url?: string | null
           price?: number
           published?: boolean
           rating?: number
           subject: Database["public"]["Enums"]["subject"]
           title: string
+          trust_score_recebido?: number
           type: Database["public"]["Enums"]["material_type"]
         }
         Update: {
@@ -84,15 +114,25 @@ export type Database = {
           downloads?: number
           file_path?: string | null
           id?: string
+          likes?: number
           preview_url?: string | null
           price?: number
           published?: boolean
           rating?: number
           subject?: Database["public"]["Enums"]["subject"]
           title?: string
+          trust_score_recebido?: number
           type?: Database["public"]["Enums"]["material_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "materials_author_id_profiles_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -104,9 +144,12 @@ export type Database = {
           id: string
           institute: string | null
           is_teacher: boolean
+          level: number
           state: string | null
+          trust_score: number
           updated_at: string
           username: string
+          xp: number
         }
         Insert: {
           avatar_url?: string | null
@@ -117,9 +160,12 @@ export type Database = {
           id: string
           institute?: string | null
           is_teacher?: boolean
+          level?: number
           state?: string | null
+          trust_score?: number
           updated_at?: string
           username: string
+          xp?: number
         }
         Update: {
           avatar_url?: string | null
@@ -130,11 +176,43 @@ export type Database = {
           id?: string
           institute?: string | null
           is_teacher?: boolean
+          level?: number
           state?: string | null
+          trust_score?: number
           updated_at?: string
           username?: string
+          xp?: number
         }
         Relationships: []
+      }
+      subject_scores: {
+        Row: {
+          score: number
+          subject: Database["public"]["Enums"]["subject"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score?: number
+          subject: Database["public"]["Enums"]["subject"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          subject?: Database["public"]["Enums"]["subject"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_scores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

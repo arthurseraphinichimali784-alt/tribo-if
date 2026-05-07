@@ -6,21 +6,32 @@ interface AuthCtx {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  ready: boolean;
   signOut: () => Promise<void>;
 }
 
-const Ctx = createContext<AuthCtx>({ user: null, session: null, loading: true, signOut: async () => {} });
+const Ctx = createContext<AuthCtx>({
+  user: null, session: null, loading: true, ready: false, signOut: async () => {},
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+    // 1) Subscribe FIRST so we never miss an event
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s);
+      if (event === "SIGNED_OUT") setReady(true);
     });
+
+    // 2) Restore from storage
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) console.error("[auth] getSession error", error);
+      setSession(data.session);
+      setReady(true);
+    });
+
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -28,7 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{
       user: session?.user ?? null,
       session,
-      loading,
+      loading: !ready,
+      ready,
       signOut: async () => { await supabase.auth.signOut(); },
     }}>
       {children}
