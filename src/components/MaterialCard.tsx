@@ -23,7 +23,7 @@ export function MaterialCard({ m }: { m: MaterialItem }) {
   const { likes, liked, toggle, busy } = useMaterialLike(m.id, m.likes ?? 0);
 
   return (
-    <div className="glass rounded-2xl p-5 hover:border-primary/50 hover:-translate-y-1 transition-all group">
+    <Link to="/material/$id" params={{ id: m.id }} className="block glass rounded-2xl p-5 hover:border-primary/50 hover:-translate-y-1 transition-all group">
       <div className="aspect-[4/3] rounded-xl mb-4 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent flex items-center justify-center text-4xl overflow-hidden">
         {m.cover_url ? <img src={m.cover_url} alt={m.title} className="w-full h-full object-cover" /> : "📄"}
       </div>
@@ -53,6 +53,6 @@ export function MaterialCard({ m }: { m: MaterialItem }) {
           {m.price === 0 ? <span className="text-primary">Grátis</span> : `R$ ${m.price.toFixed(2)}`}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
