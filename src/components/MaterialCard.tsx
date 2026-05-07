@@ -1,4 +1,5 @@
 import { Download, Heart, Star } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { cn } from "@/lib/utils";
