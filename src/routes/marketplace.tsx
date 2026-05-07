@@ -39,6 +39,27 @@ function Marketplace() {
     });
   }, [subject, q]);
 
+  // Realtime: refletir likes/novos materiais sem refresh
+  useEffect(() => {
+    const channel = supabase
+      .channel("marketplace-materials")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "materials" }, (p) => {
+        const n: any = p.new;
+        setItems((prev) => prev.map((it) => it.id === n.id ? { ...it, likes: n.likes, downloads: n.downloads, rating: n.rating } : it));
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "materials" }, () => {
+        supabase
+          .from("materials")
+          .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,profiles(username,avatar_url)")
+          .eq("published", true)
+          .order("created_at", { ascending: false })
+          .limit(60)
+          .then(({ data }) => setItems((data ?? []) as any));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Header />
