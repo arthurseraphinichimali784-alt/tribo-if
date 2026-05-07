@@ -31,6 +31,7 @@ function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
+  if (authLoading) return null;
   if (!user) return null;
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
