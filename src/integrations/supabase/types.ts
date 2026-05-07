@@ -14,16 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          created_at: string
+          material_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          material_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          material_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          author_id: string
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          downloads: number
+          file_path: string | null
+          id: string
+          preview_url: string | null
+          price: number
+          published: boolean
+          rating: number
+          subject: Database["public"]["Enums"]["subject"]
+          title: string
+          type: Database["public"]["Enums"]["material_type"]
+        }
+        Insert: {
+          author_id: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          downloads?: number
+          file_path?: string | null
+          id?: string
+          preview_url?: string | null
+          price?: number
+          published?: boolean
+          rating?: number
+          subject: Database["public"]["Enums"]["subject"]
+          title: string
+          type: Database["public"]["Enums"]["material_type"]
+        }
+        Update: {
+          author_id?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          downloads?: number
+          file_path?: string | null
+          id?: string
+          preview_url?: string | null
+          price?: number
+          published?: boolean
+          rating?: number
+          subject?: Database["public"]["Enums"]["subject"]
+          title?: string
+          type?: Database["public"]["Enums"]["material_type"]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string | null
+          hourly_rate: number | null
+          id: string
+          institute: string | null
+          is_teacher: boolean
+          state: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          hourly_rate?: number | null
+          id: string
+          institute?: string | null
+          is_teacher?: boolean
+          state?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          hourly_rate?: number | null
+          id?: string
+          institute?: string | null
+          is_teacher?: boolean
+          state?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "teacher" | "student"
+      difficulty: "facil" | "medio" | "dificil"
+      material_type:
+        | "resumo"
+        | "flashcards"
+        | "mapa_mental"
+        | "lista_exercicios"
+        | "simulado"
+        | "outro"
+      subject:
+        | "matematica"
+        | "portugues"
+        | "ciencias"
+        | "geografia"
+        | "historia"
+        | "ingles"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +310,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "teacher", "student"],
+      difficulty: ["facil", "medio", "dificil"],
+      material_type: [
+        "resumo",
+        "flashcards",
+        "mapa_mental",
+        "lista_exercicios",
+        "simulado",
+        "outro",
+      ],
+      subject: [
+        "matematica",
+        "portugues",
+        "ciencias",
+        "geografia",
+        "historia",
+        "ingles",
+      ],
+    },
   },
 } as const
