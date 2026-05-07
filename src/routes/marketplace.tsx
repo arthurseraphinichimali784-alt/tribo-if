@@ -32,7 +32,8 @@ function Marketplace() {
       .limit(60);
     if (subject) query = query.eq("subject", subject as any);
     if (q) query = query.ilike("title", `%${q}%`);
-    query.then(({ data }) => {
+    query.then(({ data, error }) => {
+      if (error) console.error("[marketplace] erro ao buscar materiais", error);
       setItems((data ?? []) as any);
       setLoading(false);
     });
