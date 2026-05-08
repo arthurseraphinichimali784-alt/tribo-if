@@ -46,17 +46,45 @@ function MaterialDetail() {
 
   const { likes, liked, toggle, busy } = useMaterialLike(id, m?.likes ?? 0);
 
+  const isPdf = !!m?.file_path && /\.pdf($|\?)/i.test(m.file_path);
+
+  // Generate signed URL for inline preview (refresh every ~50min)
+  useEffect(() => {
+    if (!m?.file_path) return;
+    let cancelled = false;
+    const load = async () => {
+      const { data, error } = await supabase.storage
+        .from("materials")
+        .createSignedUrl(m.file_path, 60 * 60);
+      if (cancelled) return;
+      if (error) { console.error(error); setPreviewError("Não foi possível gerar a pré-visualização"); return; }
+      setPreviewUrl(data.signedUrl);
+    };
+    load();
+    const t = setInterval(load, 50 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [m?.file_path]);
+
   const handleDownload = async () => {
     if (!user) { toast.error("Faça login para baixar"); nav({ to: "/auth" }); return; }
     if (!m?.file_path) { toast.error("Este material não tem arquivo anexado"); return; }
     setDownloading(true);
     try {
-      const { data, error } = await supabase.storage
+      // Use the SDK download (fetches as blob) to avoid browser/extension blocks
+      // on signed Supabase URLs (e.g. Brave shields).
+      const { data: blob, error } = await supabase.storage
         .from("materials")
-        .createSignedUrl(m.file_path, 60);
-      if (error) throw error;
+        .download(m.file_path);
+      if (error || !blob) throw error ?? new Error("Falha ao baixar");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = m.file_path.split("/").pop() ?? `${m.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       await supabase.from("materials").update({ downloads: (m.downloads ?? 0) + 1 }).eq("id", id);
-      window.open(data.signedUrl, "_blank");
       toast.success("Download iniciado!");
     } catch (e: any) {
       console.error(e);
