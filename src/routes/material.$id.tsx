@@ -1,15 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
+import { useTrackView } from "@/hooks/useTrackView";
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Download, Heart, Loader2, Star, ArrowLeft } from "lucide-react";
+import { Download, Heart, Loader2, Star, ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
+import { CommentThread } from "@/components/comments/CommentThread";
+import { FavoriteButton } from "@/components/FavoriteButton";
+
+type PreviewMode = "embed" | "google";
 
 export const Route = createFileRoute("/material/$id")({ component: MaterialDetail });
 
@@ -22,6 +28,8 @@ function MaterialDetail() {
   const [downloading, setDownloading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("embed");
+  const objectLoadedRef = useRef(false);
 
   useEffect(() => {
     setLoading(true);
@@ -44,11 +52,12 @@ function MaterialDetail() {
     return () => { supabase.removeChannel(channel); };
   }, [id]);
 
+  useTrackView(m?.id, user?.id);
+
   const { likes, liked, toggle, busy } = useMaterialLike(id, m?.likes ?? 0);
 
   const isPdf = !!m?.file_path && /\.pdf($|\?)/i.test(m.file_path);
 
-  // Generate signed URL for inline preview (refresh every ~50min)
   useEffect(() => {
     if (!m?.file_path) return;
     let cancelled = false;
@@ -59,34 +68,41 @@ function MaterialDetail() {
       if (cancelled) return;
       if (error) { console.error(error); setPreviewError("Não foi possível gerar a pré-visualização"); return; }
       setPreviewUrl(data.signedUrl);
+      setPreviewError(null);
+      objectLoadedRef.current = false;
     };
     load();
     const t = setInterval(load, 50 * 60 * 1000);
     return () => { cancelled = true; clearInterval(t); };
   }, [m?.file_path]);
 
+  // Auto-fallback: if the inline <object> doesn't load within 3.5s,
+  // switch to the Google Docs viewer (handles Brave/extension blocks).
+  useEffect(() => {
+    if (!previewUrl || !isPdf || previewMode !== "embed") return;
+    const t = setTimeout(() => {
+      if (!objectLoadedRef.current) setPreviewMode("google");
+    }, 3500);
+    return () => clearTimeout(t);
+  }, [previewUrl, isPdf, previewMode]);
+
   const handleDownload = async () => {
     if (!user) { toast.error("Faça login para baixar"); nav({ to: "/auth" }); return; }
     if (!m?.file_path) { toast.error("Este material não tem arquivo anexado"); return; }
     setDownloading(true);
     try {
-      // Use the SDK download (fetches as blob) to avoid browser/extension blocks
-      // on signed Supabase URLs (e.g. Brave shields).
-      const { data: blob, error } = await supabase.storage
-        .from("materials")
-        .download(m.file_path);
+      const { data: blob, error } = await supabase.storage.from("materials").download(m.file_path);
       if (error || !blob) throw error ?? new Error("Falha ao baixar");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = m.file_path.split("/").pop() ?? `${m.title}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       await supabase.from("materials").update({ downloads: (m.downloads ?? 0) + 1 }).eq("id", id);
+      track("material_download", { entity_type: "material", entity_id: id });
       toast.success("Download iniciado!");
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       toast.error("Erro ao baixar arquivo");
     } finally { setDownloading(false); }
@@ -127,6 +143,7 @@ function MaterialDetail() {
               <button onClick={toggle} disabled={busy} className={cn("flex items-center gap-1.5 hover:text-primary transition", liked && "text-primary")}>
                 <Heart className={cn("h-4 w-4", liked && "fill-current")} /> {likes}
               </button>
+              <FavoriteButton materialId={id} count={m.saves_count ?? 0} compact />
               <span className="flex items-center gap-1.5 text-muted-foreground"><Download className="h-4 w-4" /> {m.downloads}</span>
               <span className="flex items-center gap-1.5 text-muted-foreground"><Star className="h-4 w-4 text-warning" /> {Number(m.rating).toFixed(1)}</span>
             </div>
@@ -135,31 +152,59 @@ function MaterialDetail() {
               <div className="text-2xl font-bold">
                 {Number(m.price) === 0 ? <span className="text-primary">Grátis</span> : `R$ ${Number(m.price).toFixed(2)}`}
               </div>
-              <Button onClick={handleDownload} disabled={downloading} size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow">
-                {downloading ? "Carregando..." : (<><Download className="h-4 w-4 mr-2" /> Baixar material</>)}
-              </Button>
+              <div className="flex gap-2">
+                <FavoriteButton materialId={id} />
+                <Button onClick={handleDownload} disabled={downloading} size="lg" className="bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow">
+                  {downloading ? "Carregando..." : (<><Download className="h-4 w-4 mr-2" /> Baixar</>)}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
         {m?.file_path && (
           <div className="glass-strong rounded-3xl overflow-hidden mb-6">
-            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between gap-2 flex-wrap">
               <h2 className="font-semibold">Pré-visualização</h2>
-              {previewUrl && (
-                <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
-                  Abrir em nova aba
-                </a>
-              )}
+              <div className="flex items-center gap-2">
+                {isPdf && previewUrl && (
+                  <Button
+                    variant="ghost" size="sm"
+                    onClick={() => { objectLoadedRef.current = false; setPreviewMode((m) => m === "embed" ? "google" : "embed"); }}
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 mr-1" /> {previewMode === "embed" ? "Usar visualizador alternativo" : "Voltar ao embed"}
+                  </Button>
+                )}
+                {previewUrl && (
+                  <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Abrir em nova aba
+                  </a>
+                )}
+              </div>
             </div>
             {previewError ? (
               <div className="p-8 text-center text-sm text-muted-foreground">{previewError}</div>
             ) : !previewUrl ? (
               <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : isPdf ? (
-              <object data={`${previewUrl}#toolbar=1&view=FitH`} type="application/pdf" className="w-full h-[80vh] bg-background">
-                <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`} className="w-full h-[80vh]" title="Pré-visualização" />
-              </object>
+              previewMode === "embed" ? (
+                <object
+                  data={`${previewUrl}#toolbar=1&view=FitH`}
+                  type="application/pdf"
+                  className="w-full h-[80vh] bg-background"
+                  onLoad={() => { objectLoadedRef.current = true; }}
+                >
+                  <iframe
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`}
+                    className="w-full h-[80vh]" title="Pré-visualização"
+                  />
+                </object>
+              ) : (
+                <iframe
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`}
+                  className="w-full h-[80vh] bg-background" title="Pré-visualização"
+                />
+              )
             ) : (
               <div className="p-8 text-center text-sm text-muted-foreground">
                 Pré-visualização indisponível para este formato. Use o botão de download.
@@ -169,7 +214,7 @@ function MaterialDetail() {
         )}
 
         {m.profiles && (
-          <div className="glass rounded-2xl p-5 flex items-center gap-4">
+          <Link to="/u/$username" params={{ username: m.profiles.username }} className="glass rounded-2xl p-5 flex items-center gap-4 mb-6 hover:border-primary/40 transition">
             <Avatar className="h-14 w-14 ring-2 ring-primary/30">
               <AvatarImage src={m.profiles.avatar_url ?? undefined} />
               <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
@@ -180,8 +225,11 @@ function MaterialDetail() {
               <div className="font-semibold">{m.profiles.full_name ?? m.profiles.username}</div>
               <div className="text-xs text-muted-foreground">@{m.profiles.username} · Nível {m.profiles.level} · Trust {Number(m.profiles.trust_score).toFixed(1)}</div>
             </div>
-          </div>
+            <span className="text-xs text-primary">Ver perfil →</span>
+          </Link>
         )}
+
+        <CommentThread materialId={id} materialAuthorId={m.author_id} />
       </div>
     </div>
   );

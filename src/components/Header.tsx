@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, LogOut, Upload, LayoutDashboard } from "lucide-react";
+import { GraduationCap, LogOut, Upload, LayoutDashboard, Bookmark } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +26,11 @@ export function Header() {
           <Link to="/tutores" className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary/50 transition" activeProps={{ className: "bg-secondary/70 text-primary" }}>
             Tutores
           </Link>
+          {user && (
+            <Link to="/salvos" className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary/50 transition" activeProps={{ className: "bg-secondary/70 text-primary" }}>
+              Salvos
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">

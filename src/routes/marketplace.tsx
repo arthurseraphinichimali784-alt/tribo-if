@@ -26,7 +26,7 @@ function Marketplace() {
     setLoading(true);
     let query = supabase
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(60);
@@ -39,18 +39,17 @@ function Marketplace() {
     });
   }, [subject, q]);
 
-  // Realtime: refletir likes/novos materiais sem refresh
   useEffect(() => {
     const channel = supabase
       .channel("marketplace-materials")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "materials" }, (p) => {
         const n: any = p.new;
-        setItems((prev) => prev.map((it) => it.id === n.id ? { ...it, likes: n.likes, downloads: n.downloads, rating: n.rating } : it));
+        setItems((prev) => prev.map((it) => it.id === n.id ? { ...it, likes: n.likes, downloads: n.downloads, rating: n.rating, saves_count: n.saves_count } : it));
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "materials" }, () => {
         supabase
           .from("materials")
-          .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,profiles(username,avatar_url)")
+          .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
           .eq("published", true)
           .order("created_at", { ascending: false })
           .limit(60)
