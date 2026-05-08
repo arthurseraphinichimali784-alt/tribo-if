@@ -142,6 +142,32 @@ function MaterialDetail() {
           </div>
         </div>
 
+        {m?.file_path && (
+          <div className="glass-strong rounded-3xl overflow-hidden mb-6">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
+              <h2 className="font-semibold">Pré-visualização</h2>
+              {previewUrl && (
+                <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
+                  Abrir em nova aba
+                </a>
+              )}
+            </div>
+            {previewError ? (
+              <div className="p-8 text-center text-sm text-muted-foreground">{previewError}</div>
+            ) : !previewUrl ? (
+              <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : isPdf ? (
+              <object data={`${previewUrl}#toolbar=1&view=FitH`} type="application/pdf" className="w-full h-[80vh] bg-background">
+                <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`} className="w-full h-[80vh]" title="Pré-visualização" />
+              </object>
+            ) : (
+              <div className="p-8 text-center text-sm text-muted-foreground">
+                Pré-visualização indisponível para este formato. Use o botão de download.
+              </div>
+            )}
+          </div>
+        )}
+
         {m.profiles && (
           <div className="glass rounded-2xl p-5 flex items-center gap-4">
             <Avatar className="h-14 w-14 ring-2 ring-primary/30">
