@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { setAnalyticsUser } from "@/lib/analytics";
 
 interface AuthCtx {
   user: User | null;
@@ -19,16 +20,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // 1) Subscribe FIRST so we never miss an event
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      setAnalyticsUser(s?.user?.id ?? null);
       if (event === "SIGNED_OUT") setReady(true);
     });
 
-    // 2) Restore from storage
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) console.error("[auth] getSession error", error);
       setSession(data.session);
+      setAnalyticsUser(data.session?.user?.id ?? null);
       setReady(true);
     });
 
