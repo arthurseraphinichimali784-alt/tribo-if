@@ -1,7 +1,8 @@
-import { Download, Heart, Star } from "lucide-react";
+import { Download, Heart, Star, Bookmark } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
+import { useFavorite } from "@/hooks/useFavorite";
 import { cn } from "@/lib/utils";
 
 export interface MaterialItem {
@@ -16,11 +17,14 @@ export interface MaterialItem {
   rating: number;
   cover_url: string | null;
   likes?: number;
+  saves_count?: number;
+  views_count?: number;
   profiles?: { username: string; avatar_url: string | null } | null;
 }
 
 export function MaterialCard({ m }: { m: MaterialItem }) {
   const { likes, liked, toggle, busy } = useMaterialLike(m.id, m.likes ?? 0);
+  const { saved, toggle: toggleSave, busy: savingBusy } = useFavorite(m.id);
 
   return (
     <Link to="/material/$id" params={{ id: m.id }} className="block glass rounded-2xl p-5 hover:border-primary/50 hover:-translate-y-1 transition-all group">
@@ -45,6 +49,14 @@ export function MaterialCard({ m }: { m: MaterialItem }) {
             aria-label="Curtir"
           >
             <Heart className={cn("h-3.5 w-3.5", liked && "fill-current")} />{likes}
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave(); }}
+            disabled={savingBusy}
+            className={cn("flex items-center gap-1 hover:text-primary transition", saved && "text-primary")}
+            aria-label="Salvar"
+          >
+            <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-current")} />{m.saves_count ?? 0}
           </button>
           <span className="flex items-center gap-1"><Download className="h-3 w-3" />{m.downloads}</span>
           <span className="flex items-center gap-1"><Star className="h-3 w-3 text-warning" />{m.rating.toFixed(1)}</span>
