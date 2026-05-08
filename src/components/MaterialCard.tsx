@@ -38,7 +38,12 @@ export function MaterialCard({ m }: { m: MaterialItem }) {
       <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition">{m.title}</h3>
       {m.description && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{m.description}</p>}
       {m.profiles?.username && (
-        <p className="text-xs text-muted-foreground mt-2">por @{m.profiles.username}</p>
+        <span
+          onClick={(e) => { e.stopPropagation(); }}
+          className="text-xs text-muted-foreground mt-2 block"
+        >
+          por <Link to="/u/$username" params={{ username: m.profiles.username }} className="hover:text-primary" onClick={(e) => e.stopPropagation()}>@{m.profiles.username}</Link>
+        </span>
       )}
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
