@@ -93,18 +93,23 @@ export const getActivity = createServerFn({ method: "GET" })
     const limit = Math.min(data.limit ?? 10, 30);
     const { data: events } = await supabaseAdmin
       .from("analytics_events")
-      .select("id,event_type,entity_id,created_at,metadata,user_id,profiles:user_id(username,avatar_url)" as any)
+      .select("id,event_type,entity_id,created_at,metadata,user_id")
       .in("event_type", ["material_like", "material_save", "comment_create", "material_view"])
       .order("created_at", { ascending: false })
       .limit(limit * 3);
 
     if (!events || events.length === 0) return [];
     const matIds = [...new Set(events.map((e: any) => e.entity_id).filter(Boolean))];
-    const { data: mats } = await supabaseAdmin
-      .from("materials").select("id,title,subject").in("id", matIds);
+    const userIds = [...new Set(events.map((e: any) => e.user_id).filter(Boolean))];
+    const [{ data: mats }, { data: profs }] = await Promise.all([
+      supabaseAdmin.from("materials").select("id,title,subject").in("id", matIds),
+      supabaseAdmin.from("profiles").select("id,username,avatar_url").in("id", userIds),
+    ]);
     const matMap = new Map((mats ?? []).map((m: any) => [m.id, m]));
+    const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
     return events.slice(0, limit).map((e: any) => ({
       ...e,
       material: e.entity_id ? matMap.get(e.entity_id) ?? null : null,
+      profiles: e.user_id ? profMap.get(e.user_id) ?? null : null,
     }));
   });
