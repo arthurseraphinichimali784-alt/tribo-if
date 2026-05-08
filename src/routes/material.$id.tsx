@@ -20,6 +20,8 @@ function MaterialDetail() {
   const [m, setM] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -44,17 +46,45 @@ function MaterialDetail() {
 
   const { likes, liked, toggle, busy } = useMaterialLike(id, m?.likes ?? 0);
 
+  const isPdf = !!m?.file_path && /\.pdf($|\?)/i.test(m.file_path);
+
+  // Generate signed URL for inline preview (refresh every ~50min)
+  useEffect(() => {
+    if (!m?.file_path) return;
+    let cancelled = false;
+    const load = async () => {
+      const { data, error } = await supabase.storage
+        .from("materials")
+        .createSignedUrl(m.file_path, 60 * 60);
+      if (cancelled) return;
+      if (error) { console.error(error); setPreviewError("Não foi possível gerar a pré-visualização"); return; }
+      setPreviewUrl(data.signedUrl);
+    };
+    load();
+    const t = setInterval(load, 50 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [m?.file_path]);
+
   const handleDownload = async () => {
     if (!user) { toast.error("Faça login para baixar"); nav({ to: "/auth" }); return; }
     if (!m?.file_path) { toast.error("Este material não tem arquivo anexado"); return; }
     setDownloading(true);
     try {
-      const { data, error } = await supabase.storage
+      // Use the SDK download (fetches as blob) to avoid browser/extension blocks
+      // on signed Supabase URLs (e.g. Brave shields).
+      const { data: blob, error } = await supabase.storage
         .from("materials")
-        .createSignedUrl(m.file_path, 60);
-      if (error) throw error;
+        .download(m.file_path);
+      if (error || !blob) throw error ?? new Error("Falha ao baixar");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = m.file_path.split("/").pop() ?? `${m.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       await supabase.from("materials").update({ downloads: (m.downloads ?? 0) + 1 }).eq("id", id);
-      window.open(data.signedUrl, "_blank");
       toast.success("Download iniciado!");
     } catch (e: any) {
       console.error(e);
@@ -111,6 +141,32 @@ function MaterialDetail() {
             </div>
           </div>
         </div>
+
+        {m?.file_path && (
+          <div className="glass-strong rounded-3xl overflow-hidden mb-6">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
+              <h2 className="font-semibold">Pré-visualização</h2>
+              {previewUrl && (
+                <a href={previewUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
+                  Abrir em nova aba
+                </a>
+              )}
+            </div>
+            {previewError ? (
+              <div className="p-8 text-center text-sm text-muted-foreground">{previewError}</div>
+            ) : !previewUrl ? (
+              <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : isPdf ? (
+              <object data={`${previewUrl}#toolbar=1&view=FitH`} type="application/pdf" className="w-full h-[80vh] bg-background">
+                <iframe src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`} className="w-full h-[80vh]" title="Pré-visualização" />
+              </object>
+            ) : (
+              <div className="p-8 text-center text-sm text-muted-foreground">
+                Pré-visualização indisponível para este formato. Use o botão de download.
+              </div>
+            )}
+          </div>
+        )}
 
         {m.profiles && (
           <div className="glass rounded-2xl p-5 flex items-center gap-4">
