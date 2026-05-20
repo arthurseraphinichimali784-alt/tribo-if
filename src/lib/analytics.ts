@@ -9,7 +9,9 @@ export type EventType =
   | "material_like"
   | "material_save"
   | "material_unsave"
+  | "material_publish"
   | "comment_create"
+  | "follow"
   | "search"
   | "signup"
   | "login";
