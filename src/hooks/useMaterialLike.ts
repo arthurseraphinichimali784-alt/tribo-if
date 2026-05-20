@@ -33,7 +33,7 @@ export function useMaterialLike(materialId: string, initialLikes: number) {
       const { error } = await supabase.from("material_likes")
         .insert({ user_id: user.id, material_id: materialId });
       if (error) { console.error(error); toast.error("Erro ao curtir"); }
-      else { setLiked(true); setLikes((n) => n + 1); toast.success("+5 XP para o autor!"); }
+      else { setLiked(true); setLikes((n) => n + 1); track("material_like", { entity_type: "material", entity_id: materialId }); toast.success("+5 XP para o autor!"); }
     }
     setBusy(false);
   };
