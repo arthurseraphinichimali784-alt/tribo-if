@@ -49,6 +49,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
+        <MobileNav />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
