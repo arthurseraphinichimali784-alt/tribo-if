@@ -27,6 +27,8 @@ function AuthPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState(mode);
   const [loading, setLoading] = useState(false);
+  const [emailInUse, setEmailInUse] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState("");
 
   useEffect(() => { if (user) nav({ to: "/dashboard" }); }, [user, nav]);
 
