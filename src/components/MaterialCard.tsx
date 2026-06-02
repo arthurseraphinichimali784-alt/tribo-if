@@ -1,5 +1,5 @@
 import { Download, Heart, Bookmark, MessageCircle, ArrowUpRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { SUBJECTS, subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
@@ -31,6 +31,7 @@ const DIFF_CLASS: Record<string, string> = {
 const DIFF_LABEL: Record<string, string> = { facil: "Fácil", medio: "Médio", dificil: "Difícil" };
 
 export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?: boolean }) {
+  const navigate = useNavigate();
   const { likes, liked, toggle, busy } = useMaterialLike(m.id, m.likes ?? 0);
   const { saved, toggle: toggleSave, busy: savingBusy } = useFavorite(m.id);
   const emoji = SUBJECTS.find((s) => s.value === m.subject)?.emoji ?? "📄";
@@ -69,7 +70,7 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
           to="/u/$username"
           params={{ username: m.profiles.username }}
           onClick={(e) => e.stopPropagation()}
-          className="text-[11px] text-muted-foreground mt-2 hover:text-primary inline-flex items-center gap-1 w-fit"
+          className="text-[11px] text-muted-foreground mt-2 hover:text-primary inline-flex items-center gap-1 w-fit relative z-10"
         >
           por @{m.profiles.username}
         </Link>
@@ -107,5 +108,20 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
   );
 
   if (preview) return Inner;
-  return <Link to="/material/$id" params={{ id: m.id }} className="block h-full">{Inner}</Link>;
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate({ to: "/material/$id", params: { id: m.id } })}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate({ to: "/material/$id", params: { id: m.id } });
+        }
+      }}
+      className="block h-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
+    >
+      {Inner}
+    </div>
+  );
 }
