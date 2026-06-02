@@ -108,5 +108,20 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
   );
 
   if (preview) return Inner;
-  return <Link to="/material/$id" params={{ id: m.id }} className="block h-full">{Inner}</Link>;
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate({ to: "/material/$id", params: { id: m.id } })}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate({ to: "/material/$id", params: { id: m.id } });
+        }
+      }}
+      className="block h-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
+    >
+      {Inner}
+    </div>
+  );
 }
