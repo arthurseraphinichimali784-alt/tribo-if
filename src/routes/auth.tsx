@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, LogIn, KeyRound, Mail, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth")({
@@ -26,6 +27,8 @@ function AuthPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState(mode);
   const [loading, setLoading] = useState(false);
+  const [emailInUse, setEmailInUse] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState("");
 
   useEffect(() => { if (user) nav({ to: "/dashboard" }); }, [user, nav]);
 
@@ -65,8 +68,9 @@ function AuthPage() {
       if (error) throw error;
       // Supabase retorna identities=[] quando o email já está cadastrado (anti-enumeration)
       if (data.user && data.user.identities && data.user.identities.length === 0) {
-        toast.error("Este email já está cadastrado. Faça login ou recupere sua senha.");
-        setTab("login");
+        setDuplicateEmail(email);
+        setEmailInUse(true);
+        setLoading(false);
         return;
       }
       toast.success("Conta criada! Verifique seu email para confirmar antes de entrar.");
@@ -143,6 +147,67 @@ function AuthPage() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={emailInUse} onOpenChange={setEmailInUse}>
+        <DialogContent className="glass-strong rounded-3xl border-0 sm:max-w-md text-center">
+          <DialogHeader className="flex flex-col items-center gap-3">
+            <div className="h-14 w-14 rounded-2xl bg-amber-500/15 flex items-center justify-center">
+              <Mail className="h-7 w-7 text-amber-400" />
+            </div>
+            <DialogTitle className="text-xl font-display">Email já cadastrado</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              O email <strong className="text-foreground">{duplicateEmail}</strong> já possui uma conta.
+              <br />O que você deseja fazer?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 mt-2">
+            <Button
+              onClick={() => {
+                setEmailInUse(false);
+                setTab("login");
+              }}
+              className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Fazer login
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setEmailInUse(false);
+                setLoading(true);
+                const { error } = await supabase.auth.resetPasswordForEmail(duplicateEmail, {
+                  redirectTo: `${window.location.origin}/auth`,
+                });
+                setLoading(false);
+                if (error) {
+                  toast.error(error.message ?? "Erro ao enviar email de recuperação");
+                } else {
+                  toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+                }
+              }}
+              className="w-full"
+            >
+              <KeyRound className="h-4 w-4 mr-2" />
+              Recuperar senha
+            </Button>
+
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setEmailInUse(false);
+                setDuplicateEmail("");
+              }}
+              className="w-full text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar ao cadastro
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
