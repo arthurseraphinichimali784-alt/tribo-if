@@ -68,8 +68,9 @@ function AuthPage() {
       if (error) throw error;
       // Supabase retorna identities=[] quando o email já está cadastrado (anti-enumeration)
       if (data.user && data.user.identities && data.user.identities.length === 0) {
-        toast.error("Este email já está cadastrado. Faça login ou recupere sua senha.");
-        setTab("login");
+        setDuplicateEmail(email);
+        setEmailInUse(true);
+        setLoading(false);
         return;
       }
       toast.success("Conta criada! Verifique seu email para confirmar antes de entrar.");
