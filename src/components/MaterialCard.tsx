@@ -70,7 +70,7 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
           to="/u/$username"
           params={{ username: m.profiles.username }}
           onClick={(e) => e.stopPropagation()}
-          className="text-[11px] text-muted-foreground mt-2 hover:text-primary inline-flex items-center gap-1 w-fit"
+          className="text-[11px] text-muted-foreground mt-2 hover:text-primary inline-flex items-center gap-1 w-fit relative z-10"
         >
           por @{m.profiles.username}
         </Link>
