@@ -55,7 +55,7 @@ function AuthPage() {
       const full_name = String(fd.get("full_name") || "").trim().slice(0, 100);
       const is_teacher = fd.get("is_teacher") === "on";
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -63,7 +63,13 @@ function AuthPage() {
         },
       });
       if (error) throw error;
-      toast.success("Conta criada! Verifique seu email para confirmar.");
+      // Supabase retorna identities=[] quando o email já está cadastrado (anti-enumeration)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        toast.error("Este email já está cadastrado. Faça login ou recupere sua senha.");
+        setTab("login");
+        return;
+      }
+      toast.success("Conta criada! Verifique seu email para confirmar antes de entrar.");
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao cadastrar");
     } finally { setLoading(false); }
