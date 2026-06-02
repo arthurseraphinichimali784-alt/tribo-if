@@ -1,5 +1,5 @@
 import { Download, Heart, Bookmark, MessageCircle, ArrowUpRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { SUBJECTS, subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
