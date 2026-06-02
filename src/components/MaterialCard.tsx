@@ -31,6 +31,7 @@ const DIFF_CLASS: Record<string, string> = {
 const DIFF_LABEL: Record<string, string> = { facil: "Fácil", medio: "Médio", dificil: "Difícil" };
 
 export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?: boolean }) {
+  const navigate = useNavigate();
   const { likes, liked, toggle, busy } = useMaterialLike(m.id, m.likes ?? 0);
   const { saved, toggle: toggleSave, busy: savingBusy } = useFavorite(m.id);
   const emoji = SUBJECTS.find((s) => s.value === m.subject)?.emoji ?? "📄";
