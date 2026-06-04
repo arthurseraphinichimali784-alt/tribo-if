@@ -4,11 +4,15 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  Link,
 } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { MobileNav } from "@/components/MobileNav";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { Button } from "@/components/ui/button";
+import { Compass, Home } from "lucide-react";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -35,6 +39,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   }),
   shellComponent: RootShell,
   component: RootComponent,
+  notFoundComponent: NotFoundPage,
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
@@ -56,8 +61,35 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <MobileNav />
+        <OnboardingModal />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--gradient-hero)" }}>
+      <div className="text-center max-w-md">
+        <div className="font-display text-8xl md:text-9xl font-bold text-gradient leading-none mb-4">404</div>
+        <h1 className="font-display text-2xl md:text-3xl font-bold mb-3">Página perdida nos estudos 📚</h1>
+        <p className="text-muted-foreground mb-8">
+          A URL que você tentou acessar não existe — talvez tenha sido movida, removida, ou nunca existiu.
+        </p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Link to="/">
+            <Button className="bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow">
+              <Home className="h-4 w-4 mr-2" /> Voltar pro início
+            </Button>
+          </Link>
+          <Link to="/marketplace">
+            <Button variant="outline">
+              <Compass className="h-4 w-4 mr-2" /> Explorar marketplace
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
