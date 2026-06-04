@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { track } from "@/lib/analytics";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ReportDialog } from "@/components/ReportDialog";
 
 type PreviewMode = "embed" | "google";
 
@@ -146,6 +147,7 @@ function MaterialDetail() {
               <FavoriteButton materialId={id} count={m.saves_count ?? 0} compact />
               <span className="flex items-center gap-1.5 text-muted-foreground"><Download className="h-4 w-4" /> {m.downloads}</span>
               <span className="flex items-center gap-1.5 text-muted-foreground"><Star className="h-4 w-4 text-warning" /> {Number(m.rating).toFixed(1)}</span>
+              <div className="ml-auto"><ReportDialog targetType="material" targetId={id} /></div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-border/50">

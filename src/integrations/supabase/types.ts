@@ -336,6 +336,63 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          link: string | null
+          material_id: string | null
+          read: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          material_id?: string | null
+          read?: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          material_id?: string | null
+          read?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -384,6 +441,48 @@ export type Database = {
           updated_at?: string
           username?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -508,6 +607,17 @@ export type Database = {
         | "lista_exercicios"
         | "simulado"
         | "outro"
+      notification_type:
+        | "comment"
+        | "reply"
+        | "like"
+        | "follow"
+        | "badge"
+        | "report_resolved"
+        | "material_featured"
+        | "system"
+      report_status: "pending" | "resolved" | "rejected"
+      report_target: "material" | "comment" | "user"
       subject:
         | "matematica"
         | "portugues"
@@ -652,6 +762,18 @@ export const Constants = {
         "simulado",
         "outro",
       ],
+      notification_type: [
+        "comment",
+        "reply",
+        "like",
+        "follow",
+        "badge",
+        "report_resolved",
+        "material_featured",
+        "system",
+      ],
+      report_status: ["pending", "resolved", "rejected"],
+      report_target: ["material", "comment", "user"],
       subject: [
         "matematica",
         "portugues",

@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, LogOut, Upload, LayoutDashboard, User as UserIcon } from "lucide-react";
+import { GraduationCap, LogOut, Upload, LayoutDashboard, User as UserIcon, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { useUserStats } from "@/hooks/useUserStats";
 import { XPBar } from "@/components/XPBar";
 import { LevelRing } from "@/components/LevelRing";
+import { NotificationBell } from "@/components/NotificationBell";
+import { SearchCommand } from "@/components/SearchCommand";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +32,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 glass-strong border-b border-border/50">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 group">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-3">
+        <Link to="/" className="flex items-center gap-2 group shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent btn-glow group-hover:scale-105 transition-transform">
             <GraduationCap className="h-5 w-5 text-primary-foreground" />
           </div>
@@ -55,8 +57,10 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <SearchCommand />
           {user ? (
             <>
+              <NotificationBell />
               <Button size="sm" className="bg-gradient-to-r from-primary to-accent btn-glow text-primary-foreground hidden sm:inline-flex" onClick={() => nav({ to: "/upload" })}>
                 <Upload className="h-4 w-4 mr-1.5" /> Publicar
               </Button>
@@ -82,6 +86,9 @@ export function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => nav({ to: "/upload" })}>
                     <Upload className="h-4 w-4 mr-2" /> Publicar material
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => nav({ to: "/configuracoes" })}>
+                    <Settings className="h-4 w-4 mr-2" /> Configurações
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={async () => { await signOut(); nav({ to: "/" }); }}>

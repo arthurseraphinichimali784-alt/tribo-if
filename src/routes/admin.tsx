@@ -1,13 +1,20 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { getAdminMetrics } from "@/lib/admin.functions";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Loader2, Users, BookOpen, Activity, Clock } from "lucide-react";
+import { Loader2, Users, BookOpen, Activity, Clock, Flag, Check, X } from "lucide-react";
 import { subjectLabel } from "@/lib/constants";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -41,65 +48,162 @@ function AdminPage() {
           <p className="text-muted-foreground">Métricas em tempo real (atualiza a cada 30s)</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <KPI icon={Users} label="Usuários" value={data.totals.users} />
-          <KPI icon={BookOpen} label="Materiais" value={data.totals.materials} />
-          <KPI icon={Activity} label="Ativos 7d" value={data.totals.active7d} />
-          <KPI icon={Activity} label="Eventos 30d" value={data.totals.events30d} />
-          <KPI icon={Clock} label="Leitura média" value={`${data.totals.avg_read_seconds}s`} />
-        </div>
+        <Tabs defaultValue="metrics">
+          <TabsList>
+            <TabsTrigger value="metrics">Métricas</TabsTrigger>
+            <TabsTrigger value="reports">
+              <Flag className="h-3.5 w-3.5 mr-1.5" /> Denúncias
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="glass rounded-2xl p-5">
-          <h3 className="font-semibold mb-3">Eventos por dia (30d)</h3>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={data.daily}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-4">
-          <div className="glass rounded-2xl p-5">
-            <h3 className="font-semibold mb-3">Tipos de evento (30d)</h3>
-            <div className="h-64">
-              <ResponsiveContainer>
-                <BarChart data={data.byEventType}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                  <XAxis dataKey="type" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={60} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                  <Bar dataKey="count" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+          <TabsContent value="metrics" className="space-y-6 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <KPI icon={Users} label="Usuários" value={data.totals.users} />
+              <KPI icon={BookOpen} label="Materiais" value={data.totals.materials} />
+              <KPI icon={Activity} label="Ativos 7d" value={data.totals.active7d} />
+              <KPI icon={Activity} label="Eventos 30d" value={data.totals.events30d} />
+              <KPI icon={Clock} label="Leitura média" value={`${data.totals.avg_read_seconds}s`} />
             </div>
-          </div>
-          <div className="glass rounded-2xl p-5">
-            <h3 className="font-semibold mb-3">Matérias mais populares</h3>
-            <div className="h-64">
-              <ResponsiveContainer>
-                <BarChart data={data.subjectPopularity.map((s: any) => ({ ...s, label: subjectLabel(s.subject) }))}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                  <Bar dataKey="score" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-2 gap-4">
-          <TopList title="Mais curtidos" items={data.topByLikes} field="likes" />
-          <TopList title="Mais baixados" items={data.topByDownloads} field="downloads" />
-        </div>
+            <div className="glass rounded-2xl p-5">
+              <h3 className="font-semibold mb-3">Eventos por dia (30d)</h3>
+              <div className="h-64">
+                <ResponsiveContainer>
+                  <LineChart data={data.daily}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                    <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-4">
+              <div className="glass rounded-2xl p-5">
+                <h3 className="font-semibold mb-3">Tipos de evento (30d)</h3>
+                <div className="h-64">
+                  <ResponsiveContainer>
+                    <BarChart data={data.byEventType}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                      <XAxis dataKey="type" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={60} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                      <Bar dataKey="count" fill="hsl(var(--accent))" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="glass rounded-2xl p-5">
+                <h3 className="font-semibold mb-3">Matérias mais populares</h3>
+                <div className="h-64">
+                  <ResponsiveContainer>
+                    <BarChart data={data.subjectPopularity.map((s: any) => ({ ...s, label: subjectLabel(s.subject) }))}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                      <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                      <Bar dataKey="score" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-4">
+              <TopList title="Mais curtidos" items={data.topByLikes} field="likes" />
+              <TopList title="Mais baixados" items={data.topByDownloads} field="downloads" />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reports" className="mt-4">
+            <ReportsPanel />
+          </TabsContent>
+        </Tabs>
       </div>
+    </div>
+  );
+}
+
+function ReportsPanel() {
+  const qc = useQueryClient();
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"pending" | "all">("pending");
+
+  const load = async () => {
+    setLoading(true);
+    let q = supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(100);
+    if (filter === "pending") q = q.eq("status", "pending");
+    const { data } = await q;
+    setReports(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [filter]);
+
+  const updateStatus = async (id: string, status: "resolved" | "rejected") => {
+    const { error } = await supabase.from("reports").update({ status }).eq("id", id);
+    if (error) toast.error("Erro ao atualizar");
+    else { toast.success("Denúncia atualizada"); load(); qc.invalidateQueries(); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Button size="sm" variant={filter === "pending" ? "default" : "outline"} onClick={() => setFilter("pending")}>Pendentes</Button>
+        <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>Todas</Button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : reports.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground">
+          <Flag className="h-8 w-8 mx-auto mb-2 opacity-40" />
+          Nenhuma denúncia {filter === "pending" ? "pendente" : "registrada"}.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {reports.map((r) => (
+            <div key={r.id} className="glass rounded-2xl p-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <Badge variant="outline">{r.target_type}</Badge>
+                    <Badge variant={r.status === "pending" ? "default" : r.status === "resolved" ? "secondary" : "outline"}>
+                      {r.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: ptBR })}
+                    </span>
+                  </div>
+                  <div className="font-medium">{r.reason}</div>
+                  {r.details && <div className="text-sm text-muted-foreground mt-1">{r.details}</div>}
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Alvo: <code className="bg-secondary/50 px-1.5 py-0.5 rounded">{r.target_id}</code>
+                    {r.target_type === "material" && (
+                      <a href={`/material/${r.target_id}`} target="_blank" className="ml-2 text-primary hover:underline">
+                        Ver material →
+                      </a>
+                    )}
+                  </div>
+                </div>
+                {r.status === "pending" && (
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "rejected")}>
+                      <X className="h-3.5 w-3.5 mr-1" /> Rejeitar
+                    </Button>
+                    <Button size="sm" onClick={() => updateStatus(r.id, "resolved")} className="bg-success text-primary-foreground">
+                      <Check className="h-3.5 w-3.5 mr-1" /> Resolver
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
