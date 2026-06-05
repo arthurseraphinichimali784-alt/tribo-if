@@ -43,7 +43,8 @@ function PublicProfile() {
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const { data: p } = await supabase.from("public_profiles" as any).select("*").eq("username", username).maybeSingle();
+      const { data: pRaw } = await supabase.from("public_profiles" as any).select("*").eq("username", username).maybeSingle();
+      const p: any = pRaw;
       setProfile(p);
       if (!p) { setLoading(false); return; }
       const [{ data: mats }, { data: ss }] = await Promise.all([
