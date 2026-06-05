@@ -46,7 +46,7 @@ export function SearchCommand() {
           .eq("published", true)
           .ilike("title", `%${q}%`)
           .limit(6),
-        supabase.from("profiles")
+        supabase.from("public_profiles" as any)
           .select("id,username,full_name,avatar_url")
           .or(`username.ilike.%${q}%,full_name.ilike.%${q}%`)
           .limit(5),
