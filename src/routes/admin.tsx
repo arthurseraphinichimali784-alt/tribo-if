@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
-import { getAdminMetrics } from "@/lib/admin.functions";
+import { getAdminMetrics, listReports, updateReportStatus } from "@/lib/admin.functions";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Loader2, Users, BookOpen, Activity, Clock, Flag, Check, X } from "lucide-react";
 import { subjectLabel } from "@/lib/constants";
@@ -131,22 +131,29 @@ function ReportsPanel() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"pending" | "all">("pending");
+  const fetchReports = useServerFn(listReports);
+  const updateStatusFn = useServerFn(updateReportStatus);
 
   const load = async () => {
     setLoading(true);
-    let q = supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(100);
-    if (filter === "pending") q = q.eq("status", "pending");
-    const { data } = await q;
-    setReports(data ?? []);
+    try {
+      const data = await fetchReports({ data: { filter } });
+      setReports(data ?? []);
+    } catch {
+      toast.error("Erro ao carregar denúncias");
+    }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [filter]);
 
   const updateStatus = async (id: string, status: "resolved" | "rejected") => {
-    const { error } = await supabase.from("reports").update({ status }).eq("id", id);
-    if (error) toast.error("Erro ao atualizar");
-    else { toast.success("Denúncia atualizada"); load(); qc.invalidateQueries(); }
+    try {
+      await updateStatusFn({ data: { id, status } });
+      toast.success("Denúncia atualizada"); load(); qc.invalidateQueries();
+    } catch {
+      toast.error("Erro ao atualizar");
+    }
   };
 
   return (
