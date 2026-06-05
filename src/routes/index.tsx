@@ -36,7 +36,7 @@ function Home() {
   const fetchTrending = useServerFn(getTrending);
   const fetchActivity = useServerFn(getActivity);
 
-  const recs = useQuery({
+  const recs = useQuery<any>({
     queryKey: ["recs", user?.id ?? "anon"],
     queryFn: () => user?.id
       ? fetchRecs({ data: { limit: 8 } })
