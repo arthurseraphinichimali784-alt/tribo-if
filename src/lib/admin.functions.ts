@@ -70,3 +70,35 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
       subjectPopularity: [...subjectAgg.entries()].map(([subject, score]) => ({ subject, score })).sort((a, b) => b.score - a.score),
     };
   });
+
+// Admin-only: list moderation reports.
+export const listReports = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { filter?: "pending" | "all" }) => input)
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.userId);
+    let q = supabaseAdmin.from("reports").select("*").order("created_at", { ascending: false }).limit(100);
+    if (data.filter === "pending") q = q.eq("status", "pending");
+    const { data: rows, error } = await q;
+    if (error) throw new Response(error.message, { status: 500 });
+    return rows ?? [];
+  });
+
+// Admin-only: update a report's status.
+export const updateReportStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string; status: "resolved" | "rejected" }) => {
+    if (!input.id || !["resolved", "rejected"].includes(input.status)) {
+      throw new Response("Invalid input", { status: 400 });
+    }
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.userId);
+    const { error } = await supabaseAdmin
+      .from("reports")
+      .update({ status: data.status, resolved_by: context.userId })
+      .eq("id", data.id);
+    if (error) throw new Response(error.message, { status: 500 });
+    return { ok: true };
+  });
