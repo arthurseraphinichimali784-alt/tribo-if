@@ -7,7 +7,7 @@ export function useLeaderboard(limit = 5) {
   const [rows, setRows] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    supabase.from("profiles")
+    supabase.from("public_profiles" as any)
       .select("id,username,avatar_url,xp,level,trust_score")
       .order("xp", { ascending: false })
       .limit(limit)
