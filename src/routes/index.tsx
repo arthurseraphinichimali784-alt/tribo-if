@@ -13,7 +13,7 @@ import { MaterialSkeleton } from "@/components/MaterialSkeleton";
 import { HeroLogged } from "@/components/home/HeroLogged";
 import { QuickActions } from "@/components/home/QuickActions";
 import { Leaderboard } from "@/components/home/Leaderboard";
-import { getRecommendations, getTrending, getActivity } from "@/lib/recommendations.functions";
+import { getRecommendations, getPublicTrending, getTrending, getActivity } from "@/lib/recommendations.functions";
 import { ArrowRight, Sparkles, TrendingUp, Activity, Compass, Heart, Bookmark, MessageCircle, FileText } from "lucide-react";
 import { SUBJECTS, subjectLabel } from "@/lib/constants";
 import { formatDistanceToNow } from "date-fns";
@@ -32,12 +32,15 @@ function Home() {
   }, [user]);
 
   const fetchRecs = useServerFn(getRecommendations);
+  const fetchPublicTrending = useServerFn(getPublicTrending);
   const fetchTrending = useServerFn(getTrending);
   const fetchActivity = useServerFn(getActivity);
 
-  const recs = useQuery({
+  const recs = useQuery<any>({
     queryKey: ["recs", user?.id ?? "anon"],
-    queryFn: () => fetchRecs({ data: { userId: user?.id, limit: 8 } }),
+    queryFn: () => user?.id
+      ? fetchRecs({ data: { limit: 8 } })
+      : fetchPublicTrending({ data: { limit: 8 } }),
   });
   const trending = useQuery({
     queryKey: ["trending"],

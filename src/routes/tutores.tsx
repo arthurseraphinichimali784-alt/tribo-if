@@ -18,7 +18,7 @@ function Tutores() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from("profiles").select("id,username,full_name,bio,avatar_url,institute,hourly_rate")
+    supabase.from("public_profiles" as any).select("id,username,full_name,bio,avatar_url,institute,hourly_rate,is_teacher")
       .eq("is_teacher", true).limit(60).then(({ data }) => {
         setList((data ?? []) as any); setLoading(false);
       });

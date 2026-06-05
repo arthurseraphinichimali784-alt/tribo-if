@@ -1,31 +1,36 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-// Lightweight personalized recommendations.
-// Strategy: aggregate user's recent signals (views, likes, saves) by subject
-// over last 60 days, then return top-rated materials in their preferred subjects.
-export const getRecommendations = createServerFn({ method: "GET" })
-  .inputValidator((input: { userId?: string; limit?: number }) => input)
+// Trending materials for anonymous/public callers. No personal data; safe.
+export const getPublicTrending = createServerFn({ method: "GET" })
+  .inputValidator((input: { limit?: number }) => input)
   .handler(async ({ data }) => {
     const limit = Math.min(data.limit ?? 12, 24);
+    const { data: trending } = await supabaseAdmin
+      .from("materials")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+      .eq("published", true)
+      .order("likes", { ascending: false })
+      .limit(limit);
+    return { reason: "trending" as const, items: trending ?? [] };
+  });
 
-    if (!data.userId) {
-      // anonymous: trending fallback
-      const { data: trending } = await supabaseAdmin
-        .from("materials")
-        .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
-        .eq("published", true)
-        .order("likes", { ascending: false })
-        .limit(limit);
-      return { reason: "trending" as const, items: trending ?? [] };
-    }
+// Personalized recommendations for the SIGNED-IN user. The caller-supplied
+// userId is intentionally ignored to prevent IDOR — identity is derived from
+// the auth middleware context.
+export const getRecommendations = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { limit?: number }) => input)
+  .handler(async ({ data, context }) => {
+    const limit = Math.min(data.limit ?? 12, 24);
+    const userId = context.userId;
 
-    // Score subjects by signals
     const sinceIso = new Date(Date.now() - 60 * 86400_000).toISOString();
     const [{ data: views }, { data: likes }, { data: favs }] = await Promise.all([
-      supabaseAdmin.from("material_views").select("material_id,materials(subject)").eq("user_id", data.userId).gte("created_at", sinceIso).limit(500),
-      supabaseAdmin.from("material_likes").select("material_id,materials(subject)").eq("user_id", data.userId).limit(500),
-      supabaseAdmin.from("favorites").select("material_id,materials(subject)").eq("user_id", data.userId).limit(500),
+      supabaseAdmin.from("material_views").select("material_id,materials(subject)").eq("user_id", userId).gte("created_at", sinceIso).limit(500),
+      supabaseAdmin.from("material_likes").select("material_id,materials(subject)").eq("user_id", userId).limit(500),
+      supabaseAdmin.from("favorites").select("material_id,materials(subject)").eq("user_id", userId).limit(500),
     ]);
 
     const score = new Map<string, number>();
@@ -107,9 +112,13 @@ export const getActivity = createServerFn({ method: "GET" })
     ]);
     const matMap = new Map((mats ?? []).map((m: any) => [m.id, m]));
     const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
-    return events.slice(0, limit).map((e: any) => ({
-      ...e,
-      material: e.entity_id ? matMap.get(e.entity_id) ?? null : null,
-      profiles: e.user_id ? profMap.get(e.user_id) ?? null : null,
-    }));
+    return events.slice(0, limit).map((e: any) => {
+      // Strip user_id from the public response to avoid leaking UUIDs.
+      const { user_id, ...safe } = e;
+      return {
+        ...safe,
+        material: e.entity_id ? matMap.get(e.entity_id) ?? null : null,
+        profiles: e.user_id ? profMap.get(e.user_id) ?? null : null,
+      };
+    });
   });
