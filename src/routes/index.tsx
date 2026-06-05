@@ -13,7 +13,7 @@ import { MaterialSkeleton } from "@/components/MaterialSkeleton";
 import { HeroLogged } from "@/components/home/HeroLogged";
 import { QuickActions } from "@/components/home/QuickActions";
 import { Leaderboard } from "@/components/home/Leaderboard";
-import { getRecommendations, getTrending, getActivity } from "@/lib/recommendations.functions";
+import { getRecommendations, getPublicTrending, getTrending, getActivity } from "@/lib/recommendations.functions";
 import { ArrowRight, Sparkles, TrendingUp, Activity, Compass, Heart, Bookmark, MessageCircle, FileText } from "lucide-react";
 import { SUBJECTS, subjectLabel } from "@/lib/constants";
 import { formatDistanceToNow } from "date-fns";
