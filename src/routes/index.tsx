@@ -32,12 +32,15 @@ function Home() {
   }, [user]);
 
   const fetchRecs = useServerFn(getRecommendations);
+  const fetchPublicTrending = useServerFn(getPublicTrending);
   const fetchTrending = useServerFn(getTrending);
   const fetchActivity = useServerFn(getActivity);
 
   const recs = useQuery({
     queryKey: ["recs", user?.id ?? "anon"],
-    queryFn: () => fetchRecs({ data: { userId: user?.id, limit: 8 } }),
+    queryFn: () => user?.id
+      ? fetchRecs({ data: { limit: 8 } })
+      : fetchPublicTrending({ data: { limit: 8 } }),
   });
   const trending = useQuery({
     queryKey: ["trending"],
