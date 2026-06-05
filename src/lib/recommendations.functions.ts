@@ -112,9 +112,13 @@ export const getActivity = createServerFn({ method: "GET" })
     ]);
     const matMap = new Map((mats ?? []).map((m: any) => [m.id, m]));
     const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
-    return events.slice(0, limit).map((e: any) => ({
-      ...e,
-      material: e.entity_id ? matMap.get(e.entity_id) ?? null : null,
-      profiles: e.user_id ? profMap.get(e.user_id) ?? null : null,
-    }));
+    return events.slice(0, limit).map((e: any) => {
+      // Strip user_id from the public response to avoid leaking UUIDs.
+      const { user_id, ...safe } = e;
+      return {
+        ...safe,
+        material: e.entity_id ? matMap.get(e.entity_id) ?? null : null,
+        profiles: e.user_id ? profMap.get(e.user_id) ?? null : null,
+      };
+    });
   });
