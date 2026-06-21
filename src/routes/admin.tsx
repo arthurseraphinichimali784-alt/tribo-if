@@ -17,9 +17,16 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
+  ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/auth" });
+    // Exige role admin antes de qualquer render da rota
+    const { data: isAdmin, error } = await supabase.rpc("has_role", {
+      _user_id: data.user.id,
+      _role: "admin",
+    });
+    if (error || !isAdmin) throw redirect({ to: "/" });
   },
   component: AdminPage,
 });
