@@ -34,8 +34,8 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle()
-      .then(({ data }) => { setProfile(data); setLoading(false); });
+    supabase.rpc("get_my_profile")
+      .then(({ data }) => { setProfile(Array.isArray(data) ? data[0] : data); setLoading(false); });
   }, [user]);
 
   const save = async (e: React.FormEvent<HTMLFormElement>) => {

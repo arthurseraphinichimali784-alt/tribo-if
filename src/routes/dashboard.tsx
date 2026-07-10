@@ -30,12 +30,12 @@ function Dashboard() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      supabase.rpc("get_my_profile"),
       supabase.from("materials").select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes").eq("author_id", user.id).order("created_at", { ascending: false }),
     ]).then(([p, m]) => {
       if (p.error) console.error("[dashboard] profile", p.error);
       if (m.error) console.error("[dashboard] materials", m.error);
-      setProfile(p.data);
+      setProfile(Array.isArray(p.data) ? p.data[0] : p.data);
       setMaterials((m.data ?? []) as any);
       setLoading(false);
     });
