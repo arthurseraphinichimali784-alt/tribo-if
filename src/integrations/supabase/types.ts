@@ -606,6 +606,31 @@ export type Database = {
     }
     Functions: {
       bump_streak: { Args: { _user: string }; Returns: undefined }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string | null
+          hourly_rate: number | null
+          id: string
+          institute: string | null
+          is_teacher: boolean
+          level: number
+          state: string | null
+          trust_score: number
+          updated_at: string
+          username: string
+          xp: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_public_profiles: {
         Args: never
         Returns: {
