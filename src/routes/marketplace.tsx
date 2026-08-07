@@ -9,9 +9,9 @@ import { SUBJECTS } from "@/lib/constants";
 import { Search, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/marketplace")({
-  validateSearch: (s: { subject?: unknown }) => ({
-    subject: typeof s.subject === "string" ? s.subject : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { subject?: string } =>
+    typeof s.subject === "string" ? { subject: s.subject } : {},
+
   component: Marketplace,
 });
 
