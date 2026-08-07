@@ -62,7 +62,7 @@ export function CommentThread({ materialId, materialAuthorId }: { materialId: st
   useEffect(() => {
     load();
     const ch = supabase
-      .channel(`comments-${materialId}`)
+      .channel(`comments-${materialId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "comments", filter: `material_id=eq.${materialId}` }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "comment_likes" }, () => load())
       .subscribe();

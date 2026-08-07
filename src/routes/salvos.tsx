@@ -26,7 +26,7 @@ function SavedPage() {
         setLoading(false);
       });
     load();
-    const ch = supabase.channel(`fav-${user.id}`)
+    const ch = supabase.channel(`fav-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${user.id}` }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };

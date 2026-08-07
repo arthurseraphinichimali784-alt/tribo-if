@@ -84,7 +84,7 @@ function Marketplace() {
 
   useEffect(() => {
     const channel = supabase
-      .channel("marketplace-materials")
+      .channel(`marketplace-materials-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "materials" }, (p) => {
         const n: any = p.new;
         setItems((prev) => prev.map((it) => it.id === n.id
