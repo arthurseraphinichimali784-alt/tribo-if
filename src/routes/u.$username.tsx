@@ -49,7 +49,7 @@ function PublicProfile() {
       if (!p) { setLoading(false); return; }
       const [{ data: mats }, { data: ss }] = await Promise.all([
         supabase.from("materials")
-          .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count")
+          .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics")
           .eq("author_id", p.id).eq("published", true)
           .order("created_at", { ascending: false }).limit(48),
         supabase.from("subject_scores").select("subject,score").eq("user_id", p.id).order("score", { ascending: false }).limit(6),

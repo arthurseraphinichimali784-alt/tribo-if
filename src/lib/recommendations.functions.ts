@@ -9,7 +9,7 @@ export const getPublicTrending = createServerFn({ method: "GET" })
     const limit = Math.min(data.limit ?? 12, 24);
     const { data: trending } = await supabaseAdmin
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url)")
       .eq("published", true)
       .order("likes", { ascending: false })
       .limit(limit);
@@ -44,7 +44,7 @@ export const getRecommendations = createServerFn({ method: "GET" })
     if (top.length === 0) {
       const { data: trending } = await supabaseAdmin
         .from("materials")
-        .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+        .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url)")
         .eq("published", true)
         .order("likes", { ascending: false })
         .limit(limit);
@@ -55,7 +55,7 @@ export const getRecommendations = createServerFn({ method: "GET" })
 
     const { data: recs } = await supabaseAdmin
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url)")
       .eq("published", true)
       .in("subject", top as any)
       .order("rating", { ascending: false })
@@ -74,7 +74,7 @@ export const getTrending = createServerFn({ method: "GET" })
     const since = new Date(Date.now() - 7 * 86400_000).toISOString();
     const { data: items } = await supabaseAdmin
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url)")
       .eq("published", true)
       .gte("created_at", since)
       .order("likes", { ascending: false })
@@ -84,7 +84,7 @@ export const getTrending = createServerFn({ method: "GET" })
     // fallback to all-time if not enough recent data
     const { data: fallback } = await supabaseAdmin
       .from("materials")
-      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url)")
+      .select("id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url)")
       .eq("published", true)
       .order("likes", { ascending: false })
       .limit(limit);
