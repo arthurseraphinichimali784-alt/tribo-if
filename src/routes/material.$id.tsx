@@ -8,7 +8,7 @@ import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useTrackView } from "@/hooks/useTrackView";
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Download, Heart, Loader2, Star, ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
+import { Download, Heart, Loader2, Star, ArrowLeft, ExternalLink, RefreshCw, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { track } from "@/lib/analytics";
