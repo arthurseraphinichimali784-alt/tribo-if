@@ -44,7 +44,7 @@ export function SearchCommand() {
         supabase.from("materials")
           .select("id,title,subject,type")
           .eq("published", true)
-          .ilike("title", `%${q}%`)
+          .or(`title.ilike.%${q.replace(/[,%()]/g, " ")}%,description.ilike.%${q.replace(/[,%()]/g, " ")}%`)
           .limit(6),
         supabase.from("public_profiles" as any)
           .select("id,username,full_name,avatar_url")
