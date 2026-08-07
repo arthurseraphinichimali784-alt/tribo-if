@@ -14,7 +14,7 @@ export function useStreak(userId: string | undefined) {
       .then(({ data }) => setStreak((data as any) ?? { current_streak: 0, longest_streak: 0, last_activity_date: null }));
     load();
     const ch = supabase
-      .channel(`streak-${userId}`)
+      .channel(`streak-${userId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "user_streaks", filter: `user_id=eq.${userId}` }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };

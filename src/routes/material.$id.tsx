@@ -46,7 +46,7 @@ function MaterialDetail() {
       });
 
     const channel = supabase
-      .channel(`material-${id}`)
+      .channel(`material-${id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "materials", filter: `id=eq.${id}` },
         (p) => setM((prev: any) => prev ? { ...prev, ...p.new } : prev))
       .subscribe();
