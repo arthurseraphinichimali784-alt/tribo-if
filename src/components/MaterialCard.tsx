@@ -112,7 +112,7 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
           >
             <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-current")} />{m.saves_count ?? 0}
           </button>
-          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />0</span>
+          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{m.comments_count ?? 0}</span>
           <span className="flex items-center gap-1"><Download className="h-3 w-3" />{m.downloads}</span>
         </div>
         <div className="flex items-center gap-1.5">
