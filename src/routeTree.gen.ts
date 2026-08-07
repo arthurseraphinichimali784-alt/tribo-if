@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as TutoresRouteImport } from './routes/tutores'
 import { Route as SalvosRouteImport } from './routes/salvos'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -35,6 +36,11 @@ const TutoresRoute = TutoresRouteImport.update({
 const SalvosRoute = SalvosRouteImport.update({
   id: '/salvos',
   path: '/salvos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificacoesRoute = NotificacoesRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marketplace'
     | '/notificacoes'
+    | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marketplace'
     | '/notificacoes'
+    | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/marketplace'
     | '/notificacoes'
+    | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   MarketplaceRoute: typeof MarketplaceRoute
   NotificacoesRoute: typeof NotificacoesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SalvosRoute: typeof SalvosRoute
   TutoresRoute: typeof TutoresRoute
   UploadRoute: typeof UploadRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/salvos'
       fullPath: '/salvos'
       preLoaderRoute: typeof SalvosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notificacoes': {
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   MarketplaceRoute: MarketplaceRoute,
   NotificacoesRoute: NotificacoesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SalvosRoute: SalvosRoute,
   TutoresRoute: TutoresRoute,
   UploadRoute: UploadRoute,
