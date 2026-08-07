@@ -20,11 +20,13 @@ export const Route = createFileRoute("/upload")({ component: UploadPage });
 const schema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().max(1000).optional(),
-  subject: z.enum(["matematica","portugues","ciencias","geografia","historia","ingles"]),
+  subject: z.enum(["matematica","fisica","quimica","biologia","portugues","geografia","historia","ingles"]),
   type: z.enum(["resumo","flashcards","mapa_mental","lista_exercicios","simulado","outro"]),
   difficulty: z.enum(["facil","medio","dificil"]),
   price: z.number().min(0).max(9999),
+  topics: z.array(z.string().trim().min(2).max(30)).max(5),
 });
+
 
 function UploadPage() {
   const { user, loading: authLoading } = useAuth();
