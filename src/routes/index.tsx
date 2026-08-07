@@ -13,11 +13,10 @@ import { MaterialSkeleton } from "@/components/MaterialSkeleton";
 import { HeroLogged } from "@/components/home/HeroLogged";
 import { QuickActions } from "@/components/home/QuickActions";
 import { Leaderboard } from "@/components/home/Leaderboard";
-import { getRecommendations, getPublicTrending, getTrending, getActivity } from "@/lib/recommendations.functions";
-import { ArrowRight, Sparkles, TrendingUp, Activity, Compass, Heart, Bookmark, MessageCircle, FileText } from "lucide-react";
-import { SUBJECTS, subjectLabel } from "@/lib/constants";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ActivityFeed } from "@/components/home/ActivityFeed";
+import { getRecommendations, getPublicTrending, getTrending } from "@/lib/recommendations.functions";
+import { ArrowRight, Sparkles, TrendingUp, Compass } from "lucide-react";
+import { SUBJECTS } from "@/lib/constants";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -34,7 +33,6 @@ function Home() {
   const fetchRecs = useServerFn(getRecommendations);
   const fetchPublicTrending = useServerFn(getPublicTrending);
   const fetchTrending = useServerFn(getTrending);
-  const fetchActivity = useServerFn(getActivity);
 
   const recs = useQuery<any>({
     queryKey: ["recs", user?.id ?? "anon"],
@@ -45,11 +43,6 @@ function Home() {
   const trending = useQuery({
     queryKey: ["trending"],
     queryFn: () => fetchTrending({ data: { limit: 8 } }),
-  });
-  const activity = useQuery({
-    queryKey: ["activity"],
-    queryFn: () => fetchActivity({ data: { limit: 8 } }),
-    refetchInterval: 60_000,
   });
 
   return (
@@ -133,21 +126,7 @@ function Home() {
 
         <aside className="space-y-4 lg:sticky lg:top-24 self-start">
           <Leaderboard />
-          <section className="glass rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Activity className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold">Atividade recente</h3>
-            </div>
-            <div className="space-y-2 max-h-[420px] overflow-y-auto -mr-2 pr-2">
-              {activity.isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-12 rounded-lg bg-secondary/30 animate-pulse" />)
-              ) : !activity.data || activity.data.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Seja o primeiro a interagir 👀</p>
-              ) : (
-                activity.data.map((e: any) => <ActivityRow key={e.id} e={e} />)
-              )}
-            </div>
-          </section>
+          <ActivityFeed />
         </aside>
       </div>
 
@@ -199,44 +178,6 @@ function Grid({
           <MaterialCard m={m} />
         </motion.div>
       ))}
-    </div>
-  );
-}
-
-const EVENT_LABELS: Record<string, { icon: any; verb: string }> = {
-  material_like: { icon: Heart, verb: "curtiu" },
-  material_save: { icon: Bookmark, verb: "salvou" },
-  comment_create: { icon: MessageCircle, verb: "comentou em" },
-  material_publish: { icon: FileText, verb: "publicou" },
-};
-
-function ActivityRow({ e }: { e: any }) {
-  const cfg = EVENT_LABELS[e.event_type] ?? { icon: Activity, verb: e.event_type };
-  const Icon = cfg.icon;
-  const who = e.profiles?.username ?? "Alguém";
-  const when = formatDistanceToNow(new Date(e.created_at), { addSuffix: true, locale: ptBR });
-  return (
-    <div className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-secondary/30 transition">
-      <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
-        <Icon className="h-3.5 w-3.5 text-primary" />
-      </div>
-      <div className="flex-1 min-w-0 text-xs">
-        <div className="leading-tight">
-          {e.profiles?.username ? (
-            <Link to="/u/$username" params={{ username: e.profiles.username }} className="font-semibold hover:text-primary">@{who}</Link>
-          ) : <span className="font-semibold">@{who}</span>}
-          <span className="text-muted-foreground"> {cfg.verb} </span>
-        </div>
-        {e.material && (
-          <Link to="/material/$id" params={{ id: e.material.id }} className="text-[11px] font-medium hover:text-primary line-clamp-1 block">
-            {e.material.title}
-          </Link>
-        )}
-        <div className="text-[10px] text-muted-foreground mt-0.5">
-          {e.material?.subject && <span className="mr-1.5">{subjectLabel(e.material.subject)} ·</span>}
-          {when}
-        </div>
-      </div>
     </div>
   );
 }
