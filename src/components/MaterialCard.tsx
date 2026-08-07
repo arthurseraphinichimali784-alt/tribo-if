@@ -68,6 +68,21 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
       <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition leading-tight">{m.title}</h3>
       {m.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{m.description}</p>}
 
+      {!!m.topics?.length && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {m.topics.slice(0, 3).map((t) => (
+            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/60">
+              #{t}
+            </span>
+          ))}
+          {m.topics.length > 3 && (
+            <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">+{m.topics.length - 3}</span>
+          )}
+        </div>
+      )}
+
+
+
       {m.profiles?.username && !preview && (
         <Link
           to="/u/$username"
