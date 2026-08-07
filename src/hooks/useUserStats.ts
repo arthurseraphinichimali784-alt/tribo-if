@@ -40,7 +40,7 @@ export function useUserStats(userId: string | undefined) {
     load();
     if (!userId) return;
     const channel = supabase
-      .channel(`user-stats-${userId}`)
+      .channel(`user-stats-${userId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "subject_scores", filter: `user_id=eq.${userId}` }, () => load())
       .subscribe();
