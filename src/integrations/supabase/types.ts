@@ -265,6 +265,7 @@ export type Database = {
       materials: {
         Row: {
           author_id: string
+          comments_count: number
           cover_url: string | null
           created_at: string
           description: string | null
@@ -280,12 +281,14 @@ export type Database = {
           saves_count: number
           subject: Database["public"]["Enums"]["subject"]
           title: string
+          topics: string[]
           trust_score_recebido: number
           type: Database["public"]["Enums"]["material_type"]
           views_count: number
         }
         Insert: {
           author_id: string
+          comments_count?: number
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -301,12 +304,14 @@ export type Database = {
           saves_count?: number
           subject: Database["public"]["Enums"]["subject"]
           title: string
+          topics?: string[]
           trust_score_recebido?: number
           type: Database["public"]["Enums"]["material_type"]
           views_count?: number
         }
         Update: {
           author_id?: string
+          comments_count?: number
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -322,6 +327,7 @@ export type Database = {
           saves_count?: number
           subject?: Database["public"]["Enums"]["subject"]
           title?: string
+          topics?: string[]
           trust_score_recebido?: number
           type?: Database["public"]["Enums"]["material_type"]
           views_count?: number
@@ -685,6 +691,9 @@ export type Database = {
         | "geografia"
         | "historia"
         | "ingles"
+        | "fisica"
+        | "quimica"
+        | "biologia"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -841,6 +850,9 @@ export const Constants = {
         "geografia",
         "historia",
         "ingles",
+        "fisica",
+        "quimica",
+        "biologia",
       ],
     },
   },
