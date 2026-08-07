@@ -41,6 +41,8 @@ function UploadPage() {
   const [type, setType] = useState<string>("resumo");
   const [difficulty, setDifficulty] = useState<string>("medio");
   const [price, setPrice] = useState<number>(0);
+  const [topics, setTopics] = useState<string[]>([]);
+  const [topicInput, setTopicInput] = useState("");
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
   if (authLoading || !user) return null;
@@ -51,9 +53,24 @@ function UploadPage() {
     description: description || "Adicione uma descrição rica para atrair mais cliques.",
     subject, type, difficulty, price,
     downloads: 0, rating: 0,
-    cover_url: null, likes: 0, saves_count: 0,
+    cover_url: null, likes: 0, saves_count: 0, comments_count: 0, topics,
     profiles: { username: "você", avatar_url: null },
-  }), [title, description, subject, type, difficulty, price]);
+  }), [title, description, subject, type, difficulty, price, topics]);
+
+  const toggleTopic = (t: string) => {
+    setTopics((prev) => {
+      if (prev.includes(t)) return prev.filter((x) => x !== t);
+      if (prev.length >= 5) { toast.error("Máximo de 5 tópicos"); return prev; }
+      return [...prev, t];
+    });
+  };
+
+  const addCustomTopic = () => {
+    const t = topicInput.trim();
+    if (t.length < 2) return;
+    toggleTopic(t);
+    setTopicInput("");
+  };
 
   const handleFiles = (f: File | null) => {
     if (!f) return;
@@ -64,7 +81,7 @@ function UploadPage() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const data = schema.parse({ title, description: description || undefined, subject, type, difficulty, price: Number(price) });
+      const data = schema.parse({ title, description: description || undefined, subject, type, difficulty, price: Number(price), topics });
       setSubmitting(true);
       let file_path: string | null = null;
       if (file) {
@@ -75,8 +92,10 @@ function UploadPage() {
       }
       const { data: inserted, error } = await supabase.from("materials").insert({
         author_id: user.id, title: data.title, description: data.description ?? null,
-        subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price, file_path,
+        subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price,
+        topics: data.topics, file_path,
       }).select("id").maybeSingle();
+
       if (error) { console.error("[upload] insert error", error); throw error; }
       if (inserted) track("material_publish" as any, { entity_type: "material", entity_id: inserted.id, metadata: { subject, type } });
       toast.success("✨ Material publicado! +10 XP");
