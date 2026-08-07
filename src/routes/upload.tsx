@@ -185,6 +185,45 @@ function UploadPage() {
               </div>
             </div>
             <div>
+              <Label>Tópicos (até 5)</Label>
+              <p className="text-xs text-muted-foreground mb-2">Ajuda outros estudantes a encontrarem seu material.</p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {(TOPIC_SUGGESTIONS[subject] ?? []).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTopic(t)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition ${topics.includes(t) ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/60"}`}
+                  >
+                    #{t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={topicInput}
+                  maxLength={30}
+                  placeholder="Outro tópico..."
+                  onChange={(e) => setTopicInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTopic(); } }}
+                />
+                <Button type="button" variant="outline" onClick={addCustomTopic}>Adicionar</Button>
+              </div>
+              {topics.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {topics.map((t) => (
+                    <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border inline-flex items-center gap-1">
+                      #{t}
+                      <button type="button" onClick={() => toggleTopic(t)} aria-label={`Remover ${t}`}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+
               <Label htmlFor="price">Preço (R$)</Label>
               <Input id="price" type="number" min="0" max="9999" step="0.01" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
               <p className="text-xs text-muted-foreground mt-1">{price === 0 ? "🎁 Disponível gratuitamente para a comunidade" : "💰 Material premium"}</p>
