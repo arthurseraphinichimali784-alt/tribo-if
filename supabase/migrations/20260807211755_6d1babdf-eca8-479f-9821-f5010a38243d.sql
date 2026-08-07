@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.handle_comment_count() FROM PUBLIC, anon, authenticated;
