@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SUBJECTS, MATERIAL_TYPES, DIFFICULTIES } from "@/lib/constants";
+import { SUBJECTS, MATERIAL_TYPES, DIFFICULTIES, TOPIC_SUGGESTIONS } from "@/lib/constants";
 import { MaterialCard, type MaterialItem } from "@/components/MaterialCard";
 import { track } from "@/lib/analytics";
 import { toast } from "sonner";
