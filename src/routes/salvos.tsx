@@ -18,7 +18,7 @@ function SavedPage() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     const load = () => supabase.from("favorites")
-      .select("material_id,materials(id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,profiles(username,avatar_url))")
+      .select("material_id,materials(id,title,description,subject,type,difficulty,price,downloads,rating,cover_url,likes,saves_count,comments_count,topics,profiles(username,avatar_url))")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {

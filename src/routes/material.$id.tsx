@@ -8,7 +8,7 @@ import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useTrackView } from "@/hooks/useTrackView";
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Download, Heart, Loader2, Star, ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
+import { Download, Heart, Loader2, Star, ArrowLeft, ExternalLink, RefreshCw, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { track } from "@/lib/analytics";
@@ -138,17 +138,34 @@ function MaterialDetail() {
               <span className="text-muted-foreground capitalize">{m.difficulty}</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-3">{m.title}</h1>
-            {m.description && <p className="text-muted-foreground mb-6 whitespace-pre-wrap">{m.description}</p>}
+            {m.description && <p className="text-muted-foreground mb-4 whitespace-pre-wrap">{m.description}</p>}
+
+            {!!m.topics?.length && (
+              <div className="flex flex-wrap gap-1.5 mb-6">
+                {m.topics.map((t: string) => (
+                  <Link
+                    key={t}
+                    to="/marketplace"
+                    search={{ subject: m.subject }}
+                    className="text-xs px-2.5 py-1 rounded-full bg-secondary border border-border text-muted-foreground hover:border-primary/60 hover:text-primary transition"
+                  >
+                    #{t}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
               <button onClick={toggle} disabled={busy} className={cn("flex items-center gap-1.5 hover:text-primary transition", liked && "text-primary")}>
                 <Heart className={cn("h-4 w-4", liked && "fill-current")} /> {likes}
               </button>
               <FavoriteButton materialId={id} count={m.saves_count ?? 0} compact />
+              <span className="flex items-center gap-1.5 text-muted-foreground"><MessageCircle className="h-4 w-4" /> {m.comments_count ?? 0}</span>
               <span className="flex items-center gap-1.5 text-muted-foreground"><Download className="h-4 w-4" /> {m.downloads}</span>
               <span className="flex items-center gap-1.5 text-muted-foreground"><Star className="h-4 w-4 text-warning" /> {Number(m.rating).toFixed(1)}</span>
               <div className="ml-auto"><ReportDialog targetType="material" targetId={id} /></div>
             </div>
+
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-border/50">
               <div className="text-2xl font-bold">

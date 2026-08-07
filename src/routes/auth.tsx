@@ -18,10 +18,11 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: { mode?: unknown; redirect?: unknown }) => ({
-    mode: s.mode === "signup" ? ("signup" as const) : ("login" as const),
-    redirect: typeof s.redirect === "string" && s.redirect.startsWith("/") ? s.redirect : undefined,
+  validateSearch: (s: Record<string, unknown>): { mode?: "signup" | "login"; redirect?: string } => ({
+    ...(s.mode === "signup" ? { mode: "signup" as const } : s.mode === "login" ? { mode: "login" as const } : {}),
+    ...(typeof s.redirect === "string" && s.redirect.startsWith("/") ? { redirect: s.redirect } : {}),
   }),
+
   component: AuthPage,
 });
 
@@ -88,7 +89,7 @@ function AuthPage() {
   const { mode, redirect } = Route.useSearch();
   const nav = useNavigate();
   const { user } = useAuth();
-  const [tab, setTab] = useState<"login" | "signup">(mode);
+  const [tab, setTab] = useState<"login" | "signup">(mode ?? "login");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailInUse, setEmailInUse] = useState(false);

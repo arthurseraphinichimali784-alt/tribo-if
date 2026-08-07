@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SUBJECTS, MATERIAL_TYPES, DIFFICULTIES } from "@/lib/constants";
+import { SUBJECTS, MATERIAL_TYPES, DIFFICULTIES, TOPIC_SUGGESTIONS } from "@/lib/constants";
 import { MaterialCard, type MaterialItem } from "@/components/MaterialCard";
 import { track } from "@/lib/analytics";
 import { toast } from "sonner";
@@ -20,11 +20,13 @@ export const Route = createFileRoute("/upload")({ component: UploadPage });
 const schema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().max(1000).optional(),
-  subject: z.enum(["matematica","portugues","ciencias","geografia","historia","ingles"]),
+  subject: z.enum(["matematica","fisica","quimica","biologia","portugues","geografia","historia","ingles"]),
   type: z.enum(["resumo","flashcards","mapa_mental","lista_exercicios","simulado","outro"]),
   difficulty: z.enum(["facil","medio","dificil"]),
   price: z.number().min(0).max(9999),
+  topics: z.array(z.string().trim().min(2).max(30)).max(5),
 });
+
 
 function UploadPage() {
   const { user, loading: authLoading } = useAuth();
@@ -39,6 +41,8 @@ function UploadPage() {
   const [type, setType] = useState<string>("resumo");
   const [difficulty, setDifficulty] = useState<string>("medio");
   const [price, setPrice] = useState<number>(0);
+  const [topics, setTopics] = useState<string[]>([]);
+  const [topicInput, setTopicInput] = useState("");
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
   if (authLoading || !user) return null;
@@ -49,9 +53,24 @@ function UploadPage() {
     description: description || "Adicione uma descrição rica para atrair mais cliques.",
     subject, type, difficulty, price,
     downloads: 0, rating: 0,
-    cover_url: null, likes: 0, saves_count: 0,
+    cover_url: null, likes: 0, saves_count: 0, comments_count: 0, topics,
     profiles: { username: "você", avatar_url: null },
-  }), [title, description, subject, type, difficulty, price]);
+  }), [title, description, subject, type, difficulty, price, topics]);
+
+  const toggleTopic = (t: string) => {
+    setTopics((prev) => {
+      if (prev.includes(t)) return prev.filter((x) => x !== t);
+      if (prev.length >= 5) { toast.error("Máximo de 5 tópicos"); return prev; }
+      return [...prev, t];
+    });
+  };
+
+  const addCustomTopic = () => {
+    const t = topicInput.trim();
+    if (t.length < 2) return;
+    toggleTopic(t);
+    setTopicInput("");
+  };
 
   const handleFiles = (f: File | null) => {
     if (!f) return;
@@ -62,7 +81,7 @@ function UploadPage() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const data = schema.parse({ title, description: description || undefined, subject, type, difficulty, price: Number(price) });
+      const data = schema.parse({ title, description: description || undefined, subject, type, difficulty, price: Number(price), topics });
       setSubmitting(true);
       let file_path: string | null = null;
       if (file) {
@@ -73,8 +92,10 @@ function UploadPage() {
       }
       const { data: inserted, error } = await supabase.from("materials").insert({
         author_id: user.id, title: data.title, description: data.description ?? null,
-        subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price, file_path,
+        subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price,
+        topics: data.topics, file_path,
       }).select("id").maybeSingle();
+
       if (error) { console.error("[upload] insert error", error); throw error; }
       if (inserted) track("material_publish" as any, { entity_type: "material", entity_id: inserted.id, metadata: { subject, type } });
       toast.success("✨ Material publicado! +10 XP");
@@ -164,6 +185,45 @@ function UploadPage() {
               </div>
             </div>
             <div>
+              <Label>Tópicos (até 5)</Label>
+              <p className="text-xs text-muted-foreground mb-2">Ajuda outros estudantes a encontrarem seu material.</p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {(TOPIC_SUGGESTIONS[subject] ?? []).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleTopic(t)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition ${topics.includes(t) ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/60"}`}
+                  >
+                    #{t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={topicInput}
+                  maxLength={30}
+                  placeholder="Outro tópico..."
+                  onChange={(e) => setTopicInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomTopic(); } }}
+                />
+                <Button type="button" variant="outline" onClick={addCustomTopic}>Adicionar</Button>
+              </div>
+              {topics.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {topics.map((t) => (
+                    <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border inline-flex items-center gap-1">
+                      #{t}
+                      <button type="button" onClick={() => toggleTopic(t)} aria-label={`Remover ${t}`}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+
               <Label htmlFor="price">Preço (R$)</Label>
               <Input id="price" type="number" min="0" max="9999" step="0.01" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
               <p className="text-xs text-muted-foreground mt-1">{price === 0 ? "🎁 Disponível gratuitamente para a comunidade" : "💰 Material premium"}</p>

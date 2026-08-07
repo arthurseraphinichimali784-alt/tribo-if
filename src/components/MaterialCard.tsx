@@ -1,7 +1,7 @@
 import { Download, Heart, Bookmark, MessageCircle, ArrowUpRight } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { SUBJECTS, subjectLabel, typeLabel } from "@/lib/constants";
+import { subjectEmoji, subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useFavorite } from "@/hooks/useFavorite";
 import { cn } from "@/lib/utils";
@@ -20,8 +20,11 @@ export interface MaterialItem {
   likes?: number;
   saves_count?: number;
   views_count?: number;
+  comments_count?: number;
+  topics?: string[] | null;
   profiles?: { username: string; avatar_url: string | null } | null;
 }
+
 
 const DIFF_CLASS: Record<string, string> = {
   facil: "bg-success/20 text-success border-success/30",
@@ -34,7 +37,7 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
   const navigate = useNavigate();
   const { likes, liked, toggle, busy } = useMaterialLike(m.id, m.likes ?? 0);
   const { saved, toggle: toggleSave, busy: savingBusy } = useFavorite(m.id);
-  const emoji = SUBJECTS.find((s) => s.value === m.subject)?.emoji ?? "📄";
+  const emoji = subjectEmoji(m.subject);
 
   const Inner = (
     <motion.div
@@ -65,6 +68,21 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
       <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition leading-tight">{m.title}</h3>
       {m.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{m.description}</p>}
 
+      {!!m.topics?.length && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {m.topics.slice(0, 3).map((t) => (
+            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/60">
+              #{t}
+            </span>
+          ))}
+          {m.topics.length > 3 && (
+            <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">+{m.topics.length - 3}</span>
+          )}
+        </div>
+      )}
+
+
+
       {m.profiles?.username && !preview && (
         <Link
           to="/u/$username"
@@ -94,7 +112,7 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
           >
             <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-current")} />{m.saves_count ?? 0}
           </button>
-          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />0</span>
+          <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{m.comments_count ?? 0}</span>
           <span className="flex items-center gap-1"><Download className="h-3 w-3" />{m.downloads}</span>
         </div>
         <div className="flex items-center gap-1.5">
