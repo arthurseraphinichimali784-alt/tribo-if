@@ -1,7 +1,7 @@
 import { Download, Heart, Bookmark, MessageCircle, ArrowUpRight } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { SUBJECTS, subjectLabel, typeLabel } from "@/lib/constants";
+import { subjectEmoji, subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useFavorite } from "@/hooks/useFavorite";
 import { cn } from "@/lib/utils";
@@ -20,8 +20,11 @@ export interface MaterialItem {
   likes?: number;
   saves_count?: number;
   views_count?: number;
+  comments_count?: number;
+  topics?: string[] | null;
   profiles?: { username: string; avatar_url: string | null } | null;
 }
+
 
 const DIFF_CLASS: Record<string, string> = {
   facil: "bg-success/20 text-success border-success/30",
