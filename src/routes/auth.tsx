@@ -89,7 +89,7 @@ function AuthPage() {
   const { mode, redirect } = Route.useSearch();
   const nav = useNavigate();
   const { user } = useAuth();
-  const [tab, setTab] = useState<"login" | "signup">(mode);
+  const [tab, setTab] = useState<"login" | "signup">(mode ?? "login");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailInUse, setEmailInUse] = useState(false);
