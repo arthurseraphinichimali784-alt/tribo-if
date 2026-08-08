@@ -232,6 +232,14 @@ function UploadPage() {
               <Label htmlFor="price">Preço (R$)</Label>
               <Input id="price" type="number" min="0" max="9999" step="0.01" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
               <p className="text-xs text-muted-foreground mt-1">{price === 0 ? "🎁 Disponível gratuitamente para a comunidade" : "💰 Material premium"}</p>
+              {price > 0 && (
+                <div className="mt-3">
+                  <Label htmlFor="preview_pages">Páginas de prévia gratuita</Label>
+                  <Input id="preview_pages" type="number" min="1" max="10" value={previewPages} onChange={(e) => setPreviewPages(Number(e.target.value))} />
+                  <p className="text-xs text-muted-foreground mt-1">Quem ainda não comprou vê apenas essas páginas.</p>
+                </div>
+              )}
+
             </div>
             <Button type="submit" disabled={submitting} className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow h-12">
               {submitting ? "Publicando..." : "✨ Publicar e ganhar +10 XP"}
