@@ -43,9 +43,9 @@ function UploadPage() {
   const [price, setPrice] = useState<number>(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [topicInput, setTopicInput] = useState("");
+  const [previewPages, setPreviewPages] = useState<number>(1);
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
-  if (authLoading || !user) return null;
 
   const preview: MaterialItem = useMemo(() => ({
     id: "preview",
@@ -56,6 +56,9 @@ function UploadPage() {
     cover_url: null, likes: 0, saves_count: 0, comments_count: 0, topics,
     profiles: { username: "você", avatar_url: null },
   }), [title, description, subject, type, difficulty, price, topics]);
+
+  if (authLoading || !user) return null;
+
 
   const toggleTopic = (t: string) => {
     setTopics((prev) => {

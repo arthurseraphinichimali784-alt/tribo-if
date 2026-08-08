@@ -7,7 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { getAdminMetrics, listReports, updateReportStatus } from "@/lib/admin.functions";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Loader2, Users, BookOpen, Activity, Clock, Flag, Check, X } from "lucide-react";
+import { Loader2, Users, BookOpen, Activity, Clock, Flag, Check, X, BadgeCheck } from "lucide-react";
+import { AdminVerificationsPanel } from "@/components/admin/AdminVerificationsPanel";
+
 import { subjectLabel } from "@/lib/constants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -61,7 +63,11 @@ function AdminPage() {
             <TabsTrigger value="reports">
               <Flag className="h-3.5 w-3.5 mr-1.5" /> Denúncias
             </TabsTrigger>
+            <TabsTrigger value="verifications">
+              <BadgeCheck className="h-3.5 w-3.5 mr-1.5" /> Verificações
+            </TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="metrics" className="space-y-6 mt-4">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -127,6 +133,11 @@ function AdminPage() {
           <TabsContent value="reports" className="mt-4">
             <ReportsPanel />
           </TabsContent>
+
+          <TabsContent value="verifications" className="mt-4">
+            <AdminVerificationsPanel />
+          </TabsContent>
+
         </Tabs>
       </div>
     </div>

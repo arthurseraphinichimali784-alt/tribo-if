@@ -17,11 +17,13 @@ import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as BibliotecaRouteImport } from './routes/biblioteca'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as MaterialIdRouteImport } from './routes/material.$id'
+import { Route as ApiPublicMaterialFileRouteImport } from './routes/api/public/material-file'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -63,6 +65,11 @@ const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BibliotecaRoute = BibliotecaRouteImport.update({
+  id: '/biblioteca',
+  path: '/biblioteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -88,11 +95,17 @@ const MaterialIdRoute = MaterialIdRouteImport.update({
   path: '/material/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMaterialFileRoute = ApiPublicMaterialFileRouteImport.update({
+  id: '/api/public/material-file',
+  path: '/api/public/material-file',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
@@ -103,11 +116,13 @@ export interface FileRoutesByFullPath {
   '/upload': typeof UploadRoute
   '/material/$id': typeof MaterialIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
@@ -118,12 +133,14 @@ export interface FileRoutesByTo {
   '/upload': typeof UploadRoute
   '/material/$id': typeof MaterialIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
   '/marketplace': typeof MarketplaceRoute
@@ -134,6 +151,7 @@ export interface FileRoutesById {
   '/upload': typeof UploadRoute
   '/material/$id': typeof MaterialIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
     | '/marketplace'
@@ -151,11 +170,13 @@ export interface FileRouteTypes {
     | '/upload'
     | '/material/$id'
     | '/u/$username'
+    | '/api/public/material-file'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/auth'
+    | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
     | '/marketplace'
@@ -166,11 +187,13 @@ export interface FileRouteTypes {
     | '/upload'
     | '/material/$id'
     | '/u/$username'
+    | '/api/public/material-file'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
     | '/marketplace'
@@ -181,12 +204,14 @@ export interface FileRouteTypes {
     | '/upload'
     | '/material/$id'
     | '/u/$username'
+    | '/api/public/material-file'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  BibliotecaRoute: typeof BibliotecaRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   DashboardRoute: typeof DashboardRoute
   MarketplaceRoute: typeof MarketplaceRoute
@@ -197,6 +222,7 @@ export interface RootRouteChildren {
   UploadRoute: typeof UploadRoute
   MaterialIdRoute: typeof MaterialIdRoute
   UUsernameRoute: typeof UUsernameRoute
+  ApiPublicMaterialFileRoute: typeof ApiPublicMaterialFileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -257,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/biblioteca': {
+      id: '/biblioteca'
+      path: '/biblioteca'
+      fullPath: '/biblioteca'
+      preLoaderRoute: typeof BibliotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -292,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MaterialIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/material-file': {
+      id: '/api/public/material-file'
+      path: '/api/public/material-file'
+      fullPath: '/api/public/material-file'
+      preLoaderRoute: typeof ApiPublicMaterialFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -299,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  BibliotecaRoute: BibliotecaRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   DashboardRoute: DashboardRoute,
   MarketplaceRoute: MarketplaceRoute,
@@ -309,17 +350,8 @@ const rootRouteChildren: RootRouteChildren = {
   UploadRoute: UploadRoute,
   MaterialIdRoute: MaterialIdRoute,
   UUsernameRoute: UUsernameRoute,
+  ApiPublicMaterialFileRoute: ApiPublicMaterialFileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

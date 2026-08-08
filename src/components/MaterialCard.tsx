@@ -5,6 +5,7 @@ import { subjectEmoji, subjectLabel, typeLabel } from "@/lib/constants";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useFavorite } from "@/hooks/useFavorite";
 import { cn } from "@/lib/utils";
+import { TeacherBadge } from "@/components/TeacherBadge";
 
 export interface MaterialItem {
   id: string;
@@ -22,7 +23,13 @@ export interface MaterialItem {
   views_count?: number;
   comments_count?: number;
   topics?: string[] | null;
-  profiles?: { username: string; avatar_url: string | null } | null;
+  profiles?: {
+    username: string;
+    avatar_url: string | null;
+    verification_status?: string | null;
+    teaching_area?: string | null;
+    institute?: string | null;
+  } | null;
 }
 
 
@@ -92,6 +99,9 @@ export function MaterialCard({ m, preview = false }: { m: MaterialItem; preview?
         >
           por @{m.profiles.username}
         </Link>
+      )}
+      {m.profiles?.verification_status === "verificado" && !preview && (
+        <TeacherBadge p={m.profiles} className="mt-1.5" showDetails={false} />
       )}
 
       <div className="mt-auto pt-3 flex items-center justify-between gap-2 border-t border-border/40 mt-3">
