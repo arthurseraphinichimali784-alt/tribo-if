@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.bump_streak(uuid) FROM PUBLIC, anon, authenticated;
