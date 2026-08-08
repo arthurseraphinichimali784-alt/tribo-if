@@ -97,6 +97,8 @@ function UploadPage() {
         author_id: user.id, title: data.title, description: data.description ?? null,
         subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price,
         topics: data.topics, file_path,
+        preview_pages: Math.min(10, Math.max(1, Number(previewPages) || 1)),
+
       }).select("id").maybeSingle();
 
       if (error) { console.error("[upload] insert error", error); throw error; }
