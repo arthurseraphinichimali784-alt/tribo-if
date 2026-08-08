@@ -1,86 +1,85 @@
-# Professores verificados, Minha Biblioteca, licenças e denúncias
+# StudyHUB IF — Evolução para plataforma de estudos
 
-Análise do que já existe (preservado, sem recriar):
-- `profiles` (com `is_teacher`, `institute`, `state`, `hourly_rate`, XP/nível/trust)
-- `materials` (com `price`, `file_path`, bucket privado `materials`)
-- `favorites`, `material_views`, `analytics_events`, `comments`, `follows`
-- `reports` já existe (denunciante, alvo material/comentário/usuário, motivo, status pendente/resolvido/rejeitado) + área admin básica
-- `user_roles` + `has_role` (admin) e rota `/admin` protegida
-- Autenticação Google/e-mail funcionando; **ainda não há provedor de pagamento ativo** (Stripe/Pix pendem do plano Pro)
+## 1. O que já existe (análise)
 
-## 1. Verificação de professores
+**Banco (reaproveitar, não recriar):**
+- `profiles` — professor, verificação, XP, nível, trust
+- `materials` — matéria, tipo, dificuldade, preço, `topics[]`, `preview_pages`, contadores
+- `purchases` + `gen_license_code()` + `has_material_access()` — compras e licenças
+- `material_progress`, `material_views`, `material_access_log`, `favorites`, `material_likes`
+- `comments`, `notifications`, `reports`, `user_streaks`, `subject_scores`, `user_badges`
+- `teacher_verifications`, `platform_settings`, `user_roles` + `has_role()`
+- Buckets: `materials` (privado), `verification-docs` (privado), `avatars` (público)
 
-Novo em `profiles`: `user_type` (aluno/professor), `teaching_area`, `teaching_role`, `verification_status`
-(`nao_verificado` | `pendente` | `verificado` | `rejeitado`), `verified_at`, `verification_method`.
-Esses campos são **somente leitura para o próprio usuário** — só o backend admin altera status.
+**Frontend:** rotas `/`, `/marketplace`, `/material/$id`, `/biblioteca`, `/upload`, `/dashboard`, `/admin`, `/u/$username`, `/tutores`, `/salvos`, `/configuracoes`. Server functions em `src/lib/*.functions.ts`, arquivo protegido em `/api/public/material-file`.
 
-Nova tabela `teacher_verifications`: usuário, instituição, área, cargo, e-mail institucional, caminho do
-documento, método, status, motivo da rejeição, admin revisor, datas. RLS: o professor vê e cria apenas a
-própria solicitação (e só enquanto pendente); admins veem e julgam todas.
+**Lacunas reais:** tipos de conteúdo limitados (6), sem nível/série/objetivo, sem Kits, sem banco de questões/simulados, sem avaliações (rating é estático), sem trilha por objetivo de prova, home ainda “loja”.
 
-Novo bucket **privado** `verification-docs`: upload apenas em `verification-docs/{auth.uid()}/...`;
-leitura apenas pelo próprio dono e por admins (via backend). Nenhuma URL pública.
+---
 
-Páginas: aba "Verificação" no painel do professor (`/dashboard`) para enviar/acompanhar a solicitação, e
-aba "Verificações" em `/admin` para aprovar/rejeitar com motivo e histórico.
+## 2. Mudanças no banco (incrementais, sem DROP)
 
-Selo: `🟢 Professor verificado` + linha "Professor de Matemática • IFES" no perfil e nos cards/página de
-material. O selo indica apenas vínculo comprovado — nenhum texto de qualidade/"oficial".
+**Alterar existentes**
+- `materials`: novas colunas `level`, `school_year`, `goals[]`, `content_flags jsonb` (ex.: `{pdf:true, video:3, exercicios:35, gabarito:true}`), `rating_count`. Enum `material_type` ganha: `pdf`, `video`, `pdf_video`, `apostila`, `infografico`, `atividade`, `curso`, `aula`, `material_externo`, `prova_anterior`, `gabarito`, `livro`. Enum `subject` ganha `informatica`. Valores antigos preservados.
+- `notifications`: novos tipos (`kit`, `compra`, `avaliacao`, `simulado`, `recomendacao`, `meta`).
 
-## 2. Compras, licenças e acesso
+**Novas tabelas**
+- `kits` + `kit_items` (referência a materiais existentes — nada duplicado)
+- `questions`, `question_options`, `question_sets`, `question_set_items`
+- `quiz_attempts`, `quiz_answers` (desempenho por questão)
+- `topic_progress` (progresso por assunto: não iniciado / em andamento / concluído)
+- `exam_tracks` + `track_topics` (trilhas por objetivo, ex.: IFES Técnico em Informática)
+- `reviews` (avaliação 1–5 + critérios, 1 por usuário/produto, flag `verified_purchase`)
 
-Nova tabela `purchases`: `id`, `license_code` (ex. `SH-8F3K92`, único), comprador, material, autor,
-`amount`, `platform_fee` (5%), `status` (`pendente`|`pago`|`cancelado`|`reembolsado`|`falhou`), provedor e
-id externo do pagamento, datas. RLS: comprador vê só as próprias; **ninguém insere/atualiza pelo cliente**
-(escrita só por server function/serviço). Material gratuito gera licença automática no primeiro acesso, via
-server function que valida preço = 0 no banco.
+**Regras (RLS/GRANT em toda tabela nova)**
+- Kits: leitura pública só se publicado; escrita só do autor. Compra de Kit reaproveita `purchases` (coluna `kit_id` opcional) e libera acesso a todos os materiais do Kit via extensão de `has_material_access`.
+- Questões: leitura pública das publicadas, **sem** expor resposta correta ao anon — resposta/explicação servidas por server function após envio.
+- `quiz_attempts`/`quiz_answers`/`topic_progress`/`reviews`: escopo `auth.uid()`.
+- `reviews`: só quem tem compra `pago` (ou material gratuito adquirido) pode avaliar; média recalculada por trigger, nunca pelo frontend.
+- XP por estudo/questões via trigger com limite diário para impedir farming.
 
-Função SQL `has_material_access(user, material)` (security definer): autor, admin, material gratuito ou
-compra `pago`. Usada nas policies e no backend.
+---
 
-Nova tabela `material_progress`: usuário + material, `progress_percent`, `last_page`, `last_accessed_at`.
-RLS estrita por `auth.uid()`.
+## 3. Backend (server functions, sem Edge Functions)
 
-## 3. Minha Biblioteca (`/biblioteca`)
+- `kits.functions.ts` — criar/editar/publicar Kit, calcular economia, comprar Kit (preço vem do banco).
+- `questions.functions.ts` — listar questões (sem gabarito), iniciar tentativa, enviar respostas, corrigir no servidor, devolver análise.
+- `progress.functions.ts` — marcar assunto, progresso agregado por matéria/trilha.
+- `reviews.functions.ts` — criar/editar avaliação com verificação de compra.
+- `recommendations.functions.ts` (evoluir o existente) — “O que estudar agora?” usando erros por assunto + progresso + objetivo.
+- `ai.functions.ts` — ações contextuais (explicar erro, explicar mais simples, gerar questão parecida, plano de estudo) via Lovable AI, com o contexto do aluno montado no servidor.
 
-Abas: Todos • Recentes • Favoritos • Comprados. Cada item mostra capa, título, autor (com selo), disciplina,
-data de aquisição, progresso e botão "Abrir material"/"Continuar estudando". Entra no menu do Header e na
-MobileNav.
+Tudo com validação de preço, propriedade, pagamento e acesso **somente no backend**. APIs em formato DTO simples, reutilizáveis por um app Android futuro.
 
-## 4. Antipirataria
+---
 
-- Bucket `materials` continua **privado**; nada de URL pública.
-- A URL assinada de material pago passa a ser emitida por server function que confere a licença — hoje o
-  cliente pede a URL direto ao storage, isso será fechado.
-- Página de material: pagos sem licença mostram apenas prévia limitada (1ª página/descrição) + botão de compra.
-- Rodapé discreto de marca d'água na visualização: `LICENÇA SH-8F3K92 • Arthur S. • conta ****4a25`.
-  Observação honesta: marca d'água **dentro do PDF** exigiria reescrever o arquivo no servidor, o que não é
-  viável no runtime atual (sem libs nativas). Fazemos overlay no visualizador + licença rastreável por compra.
-- Downloads de pagos passam pelo backend com verificação de licença e registro do evento.
+## 4. Frontend
 
-## 5. Denúncias
+- **Tags/flairs visuais**: componente `ContentTypeBadge` + `TagChips` usados em card, marketplace, produto, biblioteca.
+- **Marketplace**: filtros combináveis (matéria, assunto, tipo, nível, série, dificuldade, objetivo, preço, avaliação, Kits).
+- **Página de produto**: “Este material contém”, avaliações com compra verificada, autor/professor verificado; para Kit, lista de itens e economia.
+- **Kits**: `/kits`, `/kit/$id`, criação em `/dashboard`.
+- **Estudos**: `/estudar` (trilhas por objetivo com progresso por assunto), `/questoes` e `/simulado/$id` com resultado e análise de desempenho, ações de IA no resultado.
+- **Biblioteca**: agrupar por matéria/objetivo/status, incluir Kits.
+- **Home**: “Continue estudando”, “Recomendado para você”, “Seus pontos fracos”, “Próximo objetivo”, Kits em destaque, professores verificados, novos materiais.
+- Perfil de professor ganha abas Materiais / Kits / Avaliações.
 
-Reaproveita `reports` (sem recriar): acrescenta status `em_analise`, motivos de pirataria/cópia/direitos
-autorais/professor falso e o admin responsável. Botão "Denunciar" já existe em materiais; passa a existir
-também em perfis. Área admin ganha filtro por status e registro de quem analisou.
+---
 
-## 6. Segurança / auditoria
+## 5. Entrega em fases
 
-Revisão de RLS em profiles, materials, purchases, material_progress, teacher_verifications, reports,
-favorites e objetos de storage; GRANTs explícitos em toda tabela nova; nenhuma policy `using(true)` para
-dados sensíveis. Ao final, rodo o linter e testo no navegador: acesso sem licença negado, tentativa de
-autoaprovação negada, tentativa de alterar `payment_status` negada, documentos de outro professor negados.
+1. **Fase 1** — Tags/flairs, classificação educacional (nível, série, objetivo), filtros e busca avançada, novos tipos de conteúdo.
+2. **Fase 2** — Kits (banco, criação, página, compra, acesso).
+3. **Fase 3** — Questões, simulados, correção server-side e análise de desempenho.
+4. **Fase 4** — Progresso por assunto, trilhas de prova, recomendações e nova Home.
+5. **Fase 5** — Avaliações com compra verificada + ações de IA educacional.
+6. **Fase 6** — Auditoria de segurança (RLS, storage, preços, XP, permissões) e verificação de fluxos.
 
-## Detalhes técnicos
+Cada fase é uma migração incremental própria, sem DROP e sem perda de dados.
 
-- Migrações incrementais (`ALTER TABLE` + novas tabelas), sem drop de tabelas existentes.
-- Backend em TanStack `createServerFn` (`purchases.functions.ts`, `library.functions.ts`,
-  `verification.functions.ts`), com `requireSupabaseAuth`; admin valida `has_role` server-side.
-- UI reutiliza os componentes atuais (glass, gradientes, MaterialCard) — sem novo estilo visual.
+## 6. Detalhes técnicos
 
-## Limitações conhecidas
-
-- **Sem provedor de pagamento ativo**: a estrutura de compras fica pronta e segura, mas a confirmação de
-  pagamento só será real quando Stripe/Pix for plugado (plano Pro). Até lá, compras pagas ficam `pendente` e
-  não liberam acesso; apenas materiais gratuitos geram licença. Não vou simular pagamento aprovado.
-- Marca d'água é overlay na visualização, não impressa no arquivo baixado.
+- Enums estendidos com `ALTER TYPE ... ADD VALUE` (nunca recriados).
+- Toda `CREATE TABLE` acompanhada de `GRANT` + RLS + policies na mesma migração.
+- Acesso a arquivos continua exclusivamente por `/api/public/material-file` com marca d'água e licença.
+- Sem duplicação de arquivos: Kit referencia `materials.id`.
