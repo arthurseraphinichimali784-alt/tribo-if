@@ -204,6 +204,51 @@ export type Database = {
           },
         ]
       }
+      material_access_log: {
+        Row: {
+          access_type: Database["public"]["Enums"]["material_access_kind"]
+          created_at: string
+          id: string
+          license_code: string | null
+          material_id: string
+          purchase_id: string | null
+          user_id: string
+        }
+        Insert: {
+          access_type: Database["public"]["Enums"]["material_access_kind"]
+          created_at?: string
+          id?: string
+          license_code?: string | null
+          material_id: string
+          purchase_id?: string | null
+          user_id: string
+        }
+        Update: {
+          access_type?: Database["public"]["Enums"]["material_access_kind"]
+          created_at?: string
+          id?: string
+          license_code?: string | null
+          material_id?: string
+          purchase_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_access_log_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_access_log_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_likes: {
         Row: {
           created_at: string
@@ -223,6 +268,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "material_likes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_progress: {
+        Row: {
+          created_at: string
+          last_accessed_at: string
+          last_page: number
+          material_id: string
+          progress_percent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_accessed_at?: string
+          last_page?: number
+          material_id: string
+          progress_percent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_accessed_at?: string
+          last_page?: number
+          material_id?: string
+          progress_percent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_progress_material_id_fkey"
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
@@ -274,6 +357,7 @@ export type Database = {
           file_path: string | null
           id: string
           likes: number
+          preview_pages: number
           preview_url: string | null
           price: number
           published: boolean
@@ -297,6 +381,7 @@ export type Database = {
           file_path?: string | null
           id?: string
           likes?: number
+          preview_pages?: number
           preview_url?: string | null
           price?: number
           published?: boolean
@@ -320,6 +405,7 @@ export type Database = {
           file_path?: string | null
           id?: string
           likes?: number
+          preview_pages?: number
           preview_url?: string | null
           price?: number
           published?: boolean
@@ -399,6 +485,27 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          id: boolean
+          platform_fee_percent: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          platform_fee_percent?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          platform_fee_percent?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -411,9 +518,17 @@ export type Database = {
           is_teacher: boolean
           level: number
           state: string | null
+          teaching_area: string | null
+          teaching_role: string | null
           trust_score: number
           updated_at: string
+          user_type: Database["public"]["Enums"]["user_kind"]
           username: string
+          verification_method:
+            | Database["public"]["Enums"]["verification_method"]
+            | null
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
           xp: number
         }
         Insert: {
@@ -427,9 +542,17 @@ export type Database = {
           is_teacher?: boolean
           level?: number
           state?: string | null
+          teaching_area?: string | null
+          teaching_role?: string | null
           trust_score?: number
           updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_kind"]
           username: string
+          verification_method?:
+            | Database["public"]["Enums"]["verification_method"]
+            | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
           xp?: number
         }
         Update: {
@@ -443,12 +566,89 @@ export type Database = {
           is_teacher?: boolean
           level?: number
           state?: string | null
+          teaching_area?: string | null
+          teaching_role?: string | null
           trust_score?: number
           updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_kind"]
           username?: string
+          verification_method?:
+            | Database["public"]["Enums"]["verification_method"]
+            | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
           xp?: number
         }
         Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount: number
+          author_id: string
+          buyer_id: string
+          created_at: string
+          external_payment_id: string | null
+          id: string
+          license_code: string
+          material_id: string
+          paid_at: string | null
+          payment_provider: string | null
+          platform_fee: number
+          platform_fee_percent: number
+          refunded_at: string | null
+          status: Database["public"]["Enums"]["purchase_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          author_id: string
+          buyer_id: string
+          created_at?: string
+          external_payment_id?: string | null
+          id?: string
+          license_code: string
+          material_id: string
+          paid_at?: string | null
+          payment_provider?: string | null
+          platform_fee?: number
+          platform_fee_percent?: number
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["purchase_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          author_id?: string
+          buyer_id?: string
+          created_at?: string
+          external_payment_id?: string | null
+          id?: string
+          license_code?: string
+          material_id?: string
+          paid_at?: string | null
+          payment_provider?: string | null
+          platform_fee?: number
+          platform_fee_percent?: number
+          refunded_at?: string | null
+          status?: Database["public"]["Enums"]["purchase_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -459,6 +659,7 @@ export type Database = {
           reason: string
           reporter_id: string
           resolved_by: string | null
+          reviewed_at: string | null
           status: Database["public"]["Enums"]["report_status"]
           target_id: string
           target_type: Database["public"]["Enums"]["report_target"]
@@ -472,6 +673,7 @@ export type Database = {
           reason: string
           reporter_id: string
           resolved_by?: string | null
+          reviewed_at?: string | null
           status?: Database["public"]["Enums"]["report_status"]
           target_id: string
           target_type: Database["public"]["Enums"]["report_target"]
@@ -485,6 +687,7 @@ export type Database = {
           reason?: string
           reporter_id?: string
           resolved_by?: string | null
+          reviewed_at?: string | null
           status?: Database["public"]["Enums"]["report_status"]
           target_id?: string
           target_type?: Database["public"]["Enums"]["report_target"]
@@ -520,6 +723,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      teacher_verifications: {
+        Row: {
+          created_at: string
+          document_path: string | null
+          email_code_expires_at: string | null
+          email_code_hash: string | null
+          id: string
+          institution: string
+          institutional_email: string | null
+          institutional_email_verified: boolean
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          teaching_area: string
+          teaching_role: string | null
+          updated_at: string
+          user_id: string
+          verification_method: Database["public"]["Enums"]["verification_method"]
+        }
+        Insert: {
+          created_at?: string
+          document_path?: string | null
+          email_code_expires_at?: string | null
+          email_code_hash?: string | null
+          id?: string
+          institution: string
+          institutional_email?: string | null
+          institutional_email_verified?: boolean
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          teaching_area: string
+          teaching_role?: string | null
+          updated_at?: string
+          user_id: string
+          verification_method?: Database["public"]["Enums"]["verification_method"]
+        }
+        Update: {
+          created_at?: string
+          document_path?: string | null
+          email_code_expires_at?: string | null
+          email_code_hash?: string | null
+          id?: string
+          institution?: string
+          institutional_email?: string | null
+          institutional_email_verified?: boolean
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          teaching_area?: string
+          teaching_role?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_method?: Database["public"]["Enums"]["verification_method"]
+        }
+        Relationships: []
       }
       user_badges: {
         Row: {
@@ -561,6 +824,39 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          browser: string | null
+          device_type: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          os: string | null
+          session_key: string
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          os?: string | null
+          session_key: string
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          device_type?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          os?: string | null
+          session_key?: string
           user_id?: string
         }
         Relationships: []
@@ -612,6 +908,7 @@ export type Database = {
     }
     Functions: {
       bump_streak: { Args: { _user: string }; Returns: undefined }
+      gen_license_code: { Args: never; Returns: string }
       get_my_profile: {
         Args: never
         Returns: {
@@ -625,9 +922,17 @@ export type Database = {
           is_teacher: boolean
           level: number
           state: string | null
+          teaching_area: string | null
+          teaching_role: string | null
           trust_score: number
           updated_at: string
+          user_type: Database["public"]["Enums"]["user_kind"]
           username: string
+          verification_method:
+            | Database["public"]["Enums"]["verification_method"]
+            | null
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
           xp: number
         }[]
         SetofOptions: {
@@ -655,6 +960,10 @@ export type Database = {
           xp: number
         }[]
       }
+      has_material_access: {
+        Args: { _material_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -666,6 +975,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "teacher" | "student"
       difficulty: "facil" | "medio" | "dificil"
+      material_access_kind: "preview" | "view" | "download"
       material_type:
         | "resumo"
         | "flashcards"
@@ -682,7 +992,13 @@ export type Database = {
         | "report_resolved"
         | "material_featured"
         | "system"
-      report_status: "pending" | "resolved" | "rejected"
+      purchase_status:
+        | "pendente"
+        | "pago"
+        | "cancelado"
+        | "reembolsado"
+        | "falhou"
+      report_status: "pending" | "resolved" | "rejected" | "em_analise"
       report_target: "material" | "comment" | "user"
       subject:
         | "matematica"
@@ -694,6 +1010,13 @@ export type Database = {
         | "fisica"
         | "quimica"
         | "biologia"
+      user_kind: "aluno" | "professor"
+      verification_method: "email_institucional" | "documento" | "analise_admin"
+      verification_status:
+        | "nao_verificado"
+        | "pendente"
+        | "verificado"
+        | "rejeitado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -823,6 +1146,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "teacher", "student"],
       difficulty: ["facil", "medio", "dificil"],
+      material_access_kind: ["preview", "view", "download"],
       material_type: [
         "resumo",
         "flashcards",
@@ -841,7 +1165,14 @@ export const Constants = {
         "material_featured",
         "system",
       ],
-      report_status: ["pending", "resolved", "rejected"],
+      purchase_status: [
+        "pendente",
+        "pago",
+        "cancelado",
+        "reembolsado",
+        "falhou",
+      ],
+      report_status: ["pending", "resolved", "rejected", "em_analise"],
       report_target: ["material", "comment", "user"],
       subject: [
         "matematica",
@@ -853,6 +1184,18 @@ export const Constants = {
         "fisica",
         "quimica",
         "biologia",
+      ],
+      user_kind: ["aluno", "professor"],
+      verification_method: [
+        "email_institucional",
+        "documento",
+        "analise_admin",
+      ],
+      verification_status: [
+        "nao_verificado",
+        "pendente",
+        "verificado",
+        "rejeitado",
       ],
     },
   },

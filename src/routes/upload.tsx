@@ -43,9 +43,9 @@ function UploadPage() {
   const [price, setPrice] = useState<number>(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [topicInput, setTopicInput] = useState("");
+  const [previewPages, setPreviewPages] = useState<number>(1);
 
   useEffect(() => { if (!authLoading && !user) nav({ to: "/auth" }); }, [authLoading, user, nav]);
-  if (authLoading || !user) return null;
 
   const preview: MaterialItem = useMemo(() => ({
     id: "preview",
@@ -56,6 +56,9 @@ function UploadPage() {
     cover_url: null, likes: 0, saves_count: 0, comments_count: 0, topics,
     profiles: { username: "você", avatar_url: null },
   }), [title, description, subject, type, difficulty, price, topics]);
+
+  if (authLoading || !user) return null;
+
 
   const toggleTopic = (t: string) => {
     setTopics((prev) => {
@@ -94,6 +97,8 @@ function UploadPage() {
         author_id: user.id, title: data.title, description: data.description ?? null,
         subject: data.subject, type: data.type, difficulty: data.difficulty, price: data.price,
         topics: data.topics, file_path,
+        preview_pages: Math.min(10, Math.max(1, Number(previewPages) || 1)),
+
       }).select("id").maybeSingle();
 
       if (error) { console.error("[upload] insert error", error); throw error; }
@@ -227,6 +232,14 @@ function UploadPage() {
               <Label htmlFor="price">Preço (R$)</Label>
               <Input id="price" type="number" min="0" max="9999" step="0.01" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
               <p className="text-xs text-muted-foreground mt-1">{price === 0 ? "🎁 Disponível gratuitamente para a comunidade" : "💰 Material premium"}</p>
+              {price > 0 && (
+                <div className="mt-3">
+                  <Label htmlFor="preview_pages">Páginas de prévia gratuita</Label>
+                  <Input id="preview_pages" type="number" min="1" max="10" value={previewPages} onChange={(e) => setPreviewPages(Number(e.target.value))} />
+                  <p className="text-xs text-muted-foreground mt-1">Quem ainda não comprou vê apenas essas páginas.</p>
+                </div>
+              )}
+
             </div>
             <Button type="submit" disabled={submitting} className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground btn-glow h-12">
               {submitting ? "Publicando..." : "✨ Publicar e ganhar +10 XP"}

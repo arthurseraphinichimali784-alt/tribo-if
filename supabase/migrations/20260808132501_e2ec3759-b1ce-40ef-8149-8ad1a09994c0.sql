@@ -1,0 +1,1 @@
+GRANT SELECT (user_type, teaching_area, teaching_role, verification_status, verified_at) ON public.profiles TO anon, authenticated;

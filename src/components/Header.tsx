@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, LogOut, Upload, LayoutDashboard, User as UserIcon, Settings } from "lucide-react";
+import { GraduationCap, LogOut, Upload, LayoutDashboard, User as UserIcon, Settings, Library } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { useUserStats } from "@/hooks/useUserStats";
@@ -50,6 +50,11 @@ export function Header() {
             Tutores
           </Link>
           {user && (
+            <Link to="/biblioteca" className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary/50 transition" activeProps={{ className: "bg-secondary/70 text-primary" }}>
+              Biblioteca
+            </Link>
+          )}
+          {user && (
             <Link to="/salvos" className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary/50 transition" activeProps={{ className: "bg-secondary/70 text-primary" }}>
               Salvos
             </Link>
@@ -81,6 +86,9 @@ export function Header() {
                       <UserIcon className="h-4 w-4 mr-2" /> Meu perfil
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem onClick={() => nav({ to: "/biblioteca" })}>
+                    <Library className="h-4 w-4 mr-2" /> Minha biblioteca
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => nav({ to: "/dashboard" })}>
                     <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
                   </DropdownMenuItem>

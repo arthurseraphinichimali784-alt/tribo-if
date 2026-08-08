@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Store, Upload, Bookmark, User } from "lucide-react";
+import { Home, Store, Upload, Library, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,7 @@ export function MobileNav() {
     { to: "/", icon: Home, label: "Início", params: undefined },
     { to: "/marketplace", icon: Store, label: "Buscar", params: undefined },
     { to: "/upload", icon: Upload, label: "Publicar", params: undefined, highlight: true },
-    { to: "/salvos", icon: Bookmark, label: "Salvos", params: undefined },
+    { to: "/biblioteca", icon: Library, label: "Biblioteca", params: undefined },
     user && username
       ? { to: "/u/$username", icon: User, label: "Perfil", params: { username } }
       : { to: "/auth", icon: User, label: "Entrar", params: undefined },

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VerificationPanel } from "@/components/VerificationPanel";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -87,7 +88,9 @@ function Dashboard() {
           <TabsList>
             <TabsTrigger value="materials">Meus materiais ({materials.length})</TabsTrigger>
             <TabsTrigger value="profile">Perfil</TabsTrigger>
+            <TabsTrigger value="verification">Professor</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="materials" className="mt-6">
             {materials.length === 0 ? (
@@ -134,7 +137,11 @@ function Dashboard() {
               </Button>
             </form>
           </TabsContent>
+          <TabsContent value="verification" className="mt-6 max-w-3xl">
+            <VerificationPanel />
+          </TabsContent>
         </Tabs>
+
       </div>
     </div>
   );
