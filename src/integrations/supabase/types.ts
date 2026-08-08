@@ -145,6 +145,42 @@ export type Database = {
           },
         ]
       }
+      exam_tracks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          institution: string | null
+          level: string | null
+          position: number
+          published: boolean
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          institution?: string | null
+          level?: string | null
+          position?: number
+          published?: boolean
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          institution?: string | null
+          level?: string | null
+          position?: number
+          published?: boolean
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -198,6 +234,107 @@ export type Database = {
           {
             foreignKeyName: "follows_following_id_fkey"
             columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_items: {
+        Row: {
+          created_at: string
+          kit_id: string
+          material_id: string
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          kit_id: string
+          material_id: string
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          kit_id?: string
+          material_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_items_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kits: {
+        Row: {
+          author_id: string
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          goals: string[]
+          id: string
+          level: string | null
+          price: number
+          published: boolean
+          rating: number
+          rating_count: number
+          subject: Database["public"]["Enums"]["subject"] | null
+          title: string
+          topics: string[]
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          goals?: string[]
+          id?: string
+          level?: string | null
+          price?: number
+          published?: boolean
+          rating?: number
+          rating_count?: number
+          subject?: Database["public"]["Enums"]["subject"] | null
+          title: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          goals?: string[]
+          id?: string
+          level?: string | null
+          price?: number
+          published?: boolean
+          rating?: number
+          rating_count?: number
+          subject?: Database["public"]["Enums"]["subject"] | null
+          title?: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kits_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -349,20 +486,25 @@ export type Database = {
         Row: {
           author_id: string
           comments_count: number
+          content_flags: Json
           cover_url: string | null
           created_at: string
           description: string | null
           difficulty: Database["public"]["Enums"]["difficulty"]
           downloads: number
           file_path: string | null
+          goals: string[]
           id: string
+          level: string | null
           likes: number
           preview_pages: number
           preview_url: string | null
           price: number
           published: boolean
           rating: number
+          rating_count: number
           saves_count: number
+          school_year: string | null
           subject: Database["public"]["Enums"]["subject"]
           title: string
           topics: string[]
@@ -373,20 +515,25 @@ export type Database = {
         Insert: {
           author_id: string
           comments_count?: number
+          content_flags?: Json
           cover_url?: string | null
           created_at?: string
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty"]
           downloads?: number
           file_path?: string | null
+          goals?: string[]
           id?: string
+          level?: string | null
           likes?: number
           preview_pages?: number
           preview_url?: string | null
           price?: number
           published?: boolean
           rating?: number
+          rating_count?: number
           saves_count?: number
+          school_year?: string | null
           subject: Database["public"]["Enums"]["subject"]
           title: string
           topics?: string[]
@@ -397,20 +544,25 @@ export type Database = {
         Update: {
           author_id?: string
           comments_count?: number
+          content_flags?: Json
           cover_url?: string | null
           created_at?: string
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty"]
           downloads?: number
           file_path?: string | null
+          goals?: string[]
           id?: string
+          level?: string | null
           likes?: number
           preview_pages?: number
           preview_url?: string | null
           price?: number
           published?: boolean
           rating?: number
+          rating_count?: number
           saves_count?: number
+          school_year?: string | null
           subject?: Database["public"]["Enums"]["subject"]
           title?: string
           topics?: string[]
@@ -589,8 +741,9 @@ export type Database = {
           created_at: string
           external_payment_id: string | null
           id: string
+          kit_id: string | null
           license_code: string
-          material_id: string
+          material_id: string | null
           paid_at: string | null
           payment_provider: string | null
           platform_fee: number
@@ -606,8 +759,9 @@ export type Database = {
           created_at?: string
           external_payment_id?: string | null
           id?: string
+          kit_id?: string | null
           license_code: string
-          material_id: string
+          material_id?: string | null
           paid_at?: string | null
           payment_provider?: string | null
           platform_fee?: number
@@ -623,8 +777,9 @@ export type Database = {
           created_at?: string
           external_payment_id?: string | null
           id?: string
+          kit_id?: string | null
           license_code?: string
-          material_id?: string
+          material_id?: string | null
           paid_at?: string | null
           payment_provider?: string | null
           platform_fee?: number
@@ -642,10 +797,292 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "purchases_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchases_material_id_fkey"
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_options: {
+        Row: {
+          content: string
+          id: string
+          is_correct: boolean
+          label: string
+          position: number
+          question_id: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          is_correct?: boolean
+          label: string
+          position?: number
+          question_id: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          is_correct?: boolean
+          label?: string
+          position?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_set_items: {
+        Row: {
+          position: number
+          question_id: string
+          set_id: string
+        }
+        Insert: {
+          position?: number
+          question_id: string
+          set_id: string
+        }
+        Update: {
+          position?: number
+          question_id?: string
+          set_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_set_items_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_set_items_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "question_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_sets: {
+        Row: {
+          author_id: string
+          created_at: string
+          description: string | null
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          id: string
+          institution: string | null
+          kind: string
+          published: boolean
+          subject: Database["public"]["Enums"]["subject"] | null
+          time_limit_minutes: number | null
+          title: string
+          topics: string[]
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          id?: string
+          institution?: string | null
+          kind?: string
+          published?: boolean
+          subject?: Database["public"]["Enums"]["subject"] | null
+          time_limit_minutes?: number | null
+          title: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          id?: string
+          institution?: string | null
+          kind?: string
+          published?: boolean
+          subject?: Database["public"]["Enums"]["subject"] | null
+          time_limit_minutes?: number | null
+          title?: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_sets_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          author_id: string
+          created_at: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          exam_year: number | null
+          explanation: string | null
+          id: string
+          institution: string | null
+          published: boolean
+          statement: string
+          subject: Database["public"]["Enums"]["subject"]
+          tags: string[]
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          exam_year?: number | null
+          explanation?: string | null
+          id?: string
+          institution?: string | null
+          published?: boolean
+          statement: string
+          subject: Database["public"]["Enums"]["subject"]
+          tags?: string[]
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          exam_year?: number | null
+          explanation?: string | null
+          id?: string
+          institution?: string | null
+          published?: boolean
+          statement?: string
+          subject?: Database["public"]["Enums"]["subject"]
+          tags?: string[]
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_answers: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          id: string
+          is_correct: boolean
+          option_id: string | null
+          question_id: string
+          subject: Database["public"]["Enums"]["subject"] | null
+          topic: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_id?: string | null
+          question_id: string
+          subject?: Database["public"]["Enums"]["subject"] | null
+          topic?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          option_id?: string | null
+          question_id?: string
+          subject?: Database["public"]["Enums"]["subject"] | null
+          topic?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          correct: number
+          created_at: string
+          finished_at: string | null
+          id: string
+          score: number
+          set_id: string | null
+          started_at: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          correct?: number
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          score?: number
+          set_id?: string | null
+          started_at?: string
+          total?: number
+          user_id: string
+        }
+        Update: {
+          correct?: number
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          score?: number
+          set_id?: string | null
+          started_at?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "question_sets"
             referencedColumns: ["id"]
           },
         ]
@@ -694,6 +1131,66 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          clarity: number | null
+          comment: string | null
+          created_at: string
+          id: string
+          kit_id: string | null
+          material_id: string | null
+          quality: number | null
+          rating: number
+          updated_at: string
+          user_id: string
+          value_rating: number | null
+          verified_purchase: boolean
+        }
+        Insert: {
+          clarity?: number | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          kit_id?: string | null
+          material_id?: string | null
+          quality?: number | null
+          rating: number
+          updated_at?: string
+          user_id: string
+          value_rating?: number | null
+          verified_purchase?: boolean
+        }
+        Update: {
+          clarity?: number | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          kit_id?: string | null
+          material_id?: string | null
+          quality?: number | null
+          rating?: number
+          updated_at?: string
+          user_id?: string
+          value_rating?: number | null
+          verified_purchase?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subject_scores: {
         Row: {
@@ -783,6 +1280,68 @@ export type Database = {
           verification_method?: Database["public"]["Enums"]["verification_method"]
         }
         Relationships: []
+      }
+      topic_progress: {
+        Row: {
+          created_at: string
+          percent: number
+          status: string
+          subject: Database["public"]["Enums"]["subject"]
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          percent?: number
+          status?: string
+          subject: Database["public"]["Enums"]["subject"]
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          percent?: number
+          status?: string
+          subject?: Database["public"]["Enums"]["subject"]
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      track_topics: {
+        Row: {
+          id: string
+          position: number
+          subject: Database["public"]["Enums"]["subject"]
+          topic: string
+          track_id: string
+        }
+        Insert: {
+          id?: string
+          position?: number
+          subject: Database["public"]["Enums"]["subject"]
+          topic: string
+          track_id: string
+        }
+        Update: {
+          id?: string
+          position?: number
+          subject?: Database["public"]["Enums"]["subject"]
+          topic?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_topics_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "exam_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_badges: {
         Row: {
@@ -983,6 +1542,18 @@ export type Database = {
         | "lista_exercicios"
         | "simulado"
         | "outro"
+        | "pdf"
+        | "video"
+        | "pdf_video"
+        | "apostila"
+        | "infografico"
+        | "atividade"
+        | "curso"
+        | "aula"
+        | "material_externo"
+        | "prova_anterior"
+        | "gabarito"
+        | "livro"
       notification_type:
         | "comment"
         | "reply"
@@ -992,6 +1563,12 @@ export type Database = {
         | "report_resolved"
         | "material_featured"
         | "system"
+        | "kit"
+        | "compra"
+        | "avaliacao"
+        | "simulado"
+        | "recomendacao"
+        | "meta"
       purchase_status:
         | "pendente"
         | "pago"
@@ -1010,6 +1587,7 @@ export type Database = {
         | "fisica"
         | "quimica"
         | "biologia"
+        | "informatica"
       user_kind: "aluno" | "professor"
       verification_method: "email_institucional" | "documento" | "analise_admin"
       verification_status:
@@ -1154,6 +1732,18 @@ export const Constants = {
         "lista_exercicios",
         "simulado",
         "outro",
+        "pdf",
+        "video",
+        "pdf_video",
+        "apostila",
+        "infografico",
+        "atividade",
+        "curso",
+        "aula",
+        "material_externo",
+        "prova_anterior",
+        "gabarito",
+        "livro",
       ],
       notification_type: [
         "comment",
@@ -1164,6 +1754,12 @@ export const Constants = {
         "report_resolved",
         "material_featured",
         "system",
+        "kit",
+        "compra",
+        "avaliacao",
+        "simulado",
+        "recomendacao",
+        "meta",
       ],
       purchase_status: [
         "pendente",
@@ -1184,6 +1780,7 @@ export const Constants = {
         "fisica",
         "quimica",
         "biologia",
+        "informatica",
       ],
       user_kind: ["aluno", "professor"],
       verification_method: [
