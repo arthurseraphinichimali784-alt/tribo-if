@@ -13,6 +13,7 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as TutoresRouteImport } from './routes/tutores'
 import { Route as SalvosRouteImport } from './routes/salvos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as QuestoesRouteImport } from './routes/questoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as KitsRouteImport } from './routes/kits'
@@ -47,6 +48,11 @@ const SalvosRoute = SalvosRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestoesRoute = QuestoesRouteImport.update({
+  id: '/questoes',
+  path: '/questoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificacoesRoute = NotificacoesRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
@@ -266,6 +278,7 @@ export interface RootRouteChildren {
   KitsRoute: typeof KitsRoute
   MarketplaceRoute: typeof MarketplaceRoute
   NotificacoesRoute: typeof NotificacoesRoute
+  QuestoesRoute: typeof QuestoesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SalvosRoute: typeof SalvosRoute
   TutoresRoute: typeof TutoresRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/questoes': {
+      id: '/questoes'
+      path: '/questoes'
+      fullPath: '/questoes'
+      preLoaderRoute: typeof QuestoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notificacoes': {
@@ -426,6 +446,7 @@ const rootRouteChildren: RootRouteChildren = {
   KitsRoute: KitsRoute,
   MarketplaceRoute: MarketplaceRoute,
   NotificacoesRoute: NotificacoesRoute,
+  QuestoesRoute: QuestoesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SalvosRoute: SalvosRoute,
   TutoresRoute: TutoresRoute,
@@ -439,3 +460,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
