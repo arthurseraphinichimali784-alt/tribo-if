@@ -13,8 +13,11 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as TutoresRouteImport } from './routes/tutores'
 import { Route as SalvosRouteImport } from './routes/salvos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as QuestoesRouteImport } from './routes/questoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as KitsRouteImport } from './routes/kits'
+import { Route as EstudarRouteImport } from './routes/estudar'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as BibliotecaRouteImport } from './routes/biblioteca'
@@ -22,7 +25,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as SimuladoIdRouteImport } from './routes/simulado.$id'
 import { Route as MaterialIdRouteImport } from './routes/material.$id'
+import { Route as KitIdRouteImport } from './routes/kit.$id'
 import { Route as ApiPublicMaterialFileRouteImport } from './routes/api/public/material-file'
 
 const UploadRoute = UploadRouteImport.update({
@@ -45,6 +50,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestoesRoute = QuestoesRouteImport.update({
+  id: '/questoes',
+  path: '/questoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotificacoesRoute = NotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
@@ -53,6 +63,16 @@ const NotificacoesRoute = NotificacoesRouteImport.update({
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KitsRoute = KitsRouteImport.update({
+  id: '/kits',
+  path: '/kits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstudarRoute = EstudarRouteImport.update({
+  id: '/estudar',
+  path: '/estudar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -90,9 +110,19 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SimuladoIdRoute = SimuladoIdRouteImport.update({
+  id: '/simulado/$id',
+  path: '/simulado/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MaterialIdRoute = MaterialIdRouteImport.update({
   id: '/material/$id',
   path: '/material/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KitIdRoute = KitIdRouteImport.update({
+  id: '/kit/$id',
+  path: '/kit/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMaterialFileRoute = ApiPublicMaterialFileRouteImport.update({
@@ -108,13 +138,18 @@ export interface FileRoutesByFullPath {
   '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/estudar': typeof EstudarRoute
+  '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
+  '/kit/$id': typeof KitIdRoute
   '/material/$id': typeof MaterialIdRoute
+  '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
@@ -125,13 +160,18 @@ export interface FileRoutesByTo {
   '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/estudar': typeof EstudarRoute
+  '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
+  '/kit/$id': typeof KitIdRoute
   '/material/$id': typeof MaterialIdRoute
+  '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
@@ -143,13 +183,18 @@ export interface FileRoutesById {
   '/biblioteca': typeof BibliotecaRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/dashboard': typeof DashboardRoute
+  '/estudar': typeof EstudarRoute
+  '/kits': typeof KitsRoute
   '/marketplace': typeof MarketplaceRoute
   '/notificacoes': typeof NotificacoesRoute
+  '/questoes': typeof QuestoesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/salvos': typeof SalvosRoute
   '/tutores': typeof TutoresRoute
   '/upload': typeof UploadRoute
+  '/kit/$id': typeof KitIdRoute
   '/material/$id': typeof MaterialIdRoute
+  '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
 }
@@ -162,13 +207,18 @@ export interface FileRouteTypes {
     | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
+    | '/estudar'
+    | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
+    | '/kit/$id'
     | '/material/$id'
+    | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
   fileRoutesByTo: FileRoutesByTo
@@ -179,13 +229,18 @@ export interface FileRouteTypes {
     | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
+    | '/estudar'
+    | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
+    | '/kit/$id'
     | '/material/$id'
+    | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
   id:
@@ -196,13 +251,18 @@ export interface FileRouteTypes {
     | '/biblioteca'
     | '/configuracoes'
     | '/dashboard'
+    | '/estudar'
+    | '/kits'
     | '/marketplace'
     | '/notificacoes'
+    | '/questoes'
     | '/reset-password'
     | '/salvos'
     | '/tutores'
     | '/upload'
+    | '/kit/$id'
     | '/material/$id'
+    | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
   fileRoutesById: FileRoutesById
@@ -214,13 +274,18 @@ export interface RootRouteChildren {
   BibliotecaRoute: typeof BibliotecaRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   DashboardRoute: typeof DashboardRoute
+  EstudarRoute: typeof EstudarRoute
+  KitsRoute: typeof KitsRoute
   MarketplaceRoute: typeof MarketplaceRoute
   NotificacoesRoute: typeof NotificacoesRoute
+  QuestoesRoute: typeof QuestoesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SalvosRoute: typeof SalvosRoute
   TutoresRoute: typeof TutoresRoute
   UploadRoute: typeof UploadRoute
+  KitIdRoute: typeof KitIdRoute
   MaterialIdRoute: typeof MaterialIdRoute
+  SimuladoIdRoute: typeof SimuladoIdRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicMaterialFileRoute: typeof ApiPublicMaterialFileRoute
 }
@@ -255,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questoes': {
+      id: '/questoes'
+      path: '/questoes'
+      fullPath: '/questoes'
+      preLoaderRoute: typeof QuestoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/notificacoes': {
       id: '/notificacoes'
       path: '/notificacoes'
@@ -267,6 +339,20 @@ declare module '@tanstack/react-router' {
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kits': {
+      id: '/kits'
+      path: '/kits'
+      fullPath: '/kits'
+      preLoaderRoute: typeof KitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estudar': {
+      id: '/estudar'
+      path: '/estudar'
+      fullPath: '/estudar'
+      preLoaderRoute: typeof EstudarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -318,11 +404,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/simulado/$id': {
+      id: '/simulado/$id'
+      path: '/simulado/$id'
+      fullPath: '/simulado/$id'
+      preLoaderRoute: typeof SimuladoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/material/$id': {
       id: '/material/$id'
       path: '/material/$id'
       fullPath: '/material/$id'
       preLoaderRoute: typeof MaterialIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kit/$id': {
+      id: '/kit/$id'
+      path: '/kit/$id'
+      fullPath: '/kit/$id'
+      preLoaderRoute: typeof KitIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/material-file': {
@@ -342,26 +442,21 @@ const rootRouteChildren: RootRouteChildren = {
   BibliotecaRoute: BibliotecaRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   DashboardRoute: DashboardRoute,
+  EstudarRoute: EstudarRoute,
+  KitsRoute: KitsRoute,
   MarketplaceRoute: MarketplaceRoute,
   NotificacoesRoute: NotificacoesRoute,
+  QuestoesRoute: QuestoesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SalvosRoute: SalvosRoute,
   TutoresRoute: TutoresRoute,
   UploadRoute: UploadRoute,
+  KitIdRoute: KitIdRoute,
   MaterialIdRoute: MaterialIdRoute,
+  SimuladoIdRoute: SimuladoIdRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicMaterialFileRoute: ApiPublicMaterialFileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
