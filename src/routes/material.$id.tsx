@@ -66,6 +66,24 @@ function MaterialDetail() {
 
   useTrackView(m?.id, user?.id);
 
+  // Volta do checkout do Mercado Pago: revalida o acesso algumas vezes até o webhook confirmar.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const status = new URLSearchParams(window.location.search).get("pagamento");
+    if (!status) return;
+    if (status === "falha") { toast.error("Pagamento não concluído."); return; }
+    toast.info("Confirmando seu pagamento...");
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries += 1;
+      await refreshAccess();
+      if (tries >= 6) clearInterval(timer);
+    }, 4000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+
   const { likes, liked, toggle, busy } = useMaterialLike(id, m?.likes ?? 0);
 
   // Carrega o arquivo protegido (prévia limitada ou versão completa com marca d'água)
