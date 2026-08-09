@@ -28,6 +28,7 @@ import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as SimuladoIdRouteImport } from './routes/simulado.$id'
 import { Route as MaterialIdRouteImport } from './routes/material.$id'
 import { Route as KitIdRouteImport } from './routes/kit.$id'
+import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
 import { Route as ApiPublicMaterialFileRouteImport } from './routes/api/public/material-file'
 
 const UploadRoute = UploadRouteImport.update({
@@ -125,6 +126,12 @@ const KitIdRoute = KitIdRouteImport.update({
   path: '/kit/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMercadopagoWebhookRoute =
+  ApiPublicMercadopagoWebhookRouteImport.update({
+    id: '/api/public/mercadopago-webhook',
+    path: '/api/public/mercadopago-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMaterialFileRoute = ApiPublicMaterialFileRouteImport.update({
   id: '/api/public/material-file',
   path: '/api/public/material-file',
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +182,7 @@ export interface FileRoutesByTo {
   '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +206,7 @@ export interface FileRoutesById {
   '/simulado/$id': typeof SimuladoIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/material-file': typeof ApiPublicMaterialFileRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
+    | '/api/public/mercadopago-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
+    | '/api/public/mercadopago-webhook'
   id:
     | '__root__'
     | '/'
@@ -265,6 +277,7 @@ export interface FileRouteTypes {
     | '/simulado/$id'
     | '/u/$username'
     | '/api/public/material-file'
+    | '/api/public/mercadopago-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -288,6 +301,7 @@ export interface RootRouteChildren {
   SimuladoIdRoute: typeof SimuladoIdRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicMaterialFileRoute: typeof ApiPublicMaterialFileRoute
+  ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -425,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KitIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/mercadopago-webhook': {
+      id: '/api/public/mercadopago-webhook'
+      path: '/api/public/mercadopago-webhook'
+      fullPath: '/api/public/mercadopago-webhook'
+      preLoaderRoute: typeof ApiPublicMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/material-file': {
       id: '/api/public/material-file'
       path: '/api/public/material-file'
@@ -456,17 +477,8 @@ const rootRouteChildren: RootRouteChildren = {
   SimuladoIdRoute: SimuladoIdRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicMaterialFileRoute: ApiPublicMaterialFileRoute,
+  ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
