@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { getKit, acquireKit, type KitDetail } from "@/lib/kits.functions";
+import { getKit, type KitDetail } from "@/lib/kits.functions";
+import { createCheckout } from "@/lib/checkout.functions";
 import { KitBadge, ContentTypeBadge, TagChips, DifficultyBadge, LevelBadge } from "@/components/ContentTags";
 import { TeacherBadge } from "@/components/TeacherBadge";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -32,7 +33,7 @@ function KitPage() {
   const { user } = useAuth();
   const nav = useNavigate();
   const fetchKit = useServerFn(getKit);
-  const buyKit = useServerFn(acquireKit);
+  const buyKit = useServerFn(createCheckout);
   const [data, setData] = useState<KitDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
@@ -55,15 +56,19 @@ function KitPage() {
     if (!user) { void nav({ to: "/auth" }); return; }
     setBuying(true);
     try {
-      const res = await buyKit({ data: { kitId: id } });
+      const res = await buyKit({ data: { kitId: id, origin: window.location.origin } });
       if (res.status === "pago") toast.success("Kit liberado! Ele já está na sua biblioteca.");
       else if (res.status === "autor") toast.info("Este kit é seu.");
-      else toast.info("Compra registrada como pendente. Assim que o pagamento for confirmado o acesso é liberado.");
+      else if (res.url) {
+        toast.info("Redirecionando para o pagamento (Pix ou cartão)...");
+        window.location.href = res.url;
+      } else toast.info("Compra pendente. Assim que o pagamento for confirmado o acesso é liberado.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível concluir agora.");
     }
     setBuying(false);
   }
+
 
   if (loading) {
     return (

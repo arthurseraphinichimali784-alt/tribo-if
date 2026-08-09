@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useTrackView } from "@/hooks/useTrackView";
 import { useMaterialAccess, fetchProtectedFile } from "@/hooks/useMaterialAccess";
-import { acquireMaterial, saveProgress } from "@/lib/purchases.functions";
+import { saveProgress } from "@/lib/purchases.functions";
+import { createCheckout } from "@/lib/checkout.functions";
+
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TeacherBadge } from "@/components/TeacherBadge";
@@ -38,7 +40,7 @@ function MaterialDetail() {
   const blobRef = useRef<string | null>(null);
 
   const { access, loading: accessLoading, refresh: refreshAccess } = useMaterialAccess(id);
-  const acquire = useServerFn(acquireMaterial);
+  const checkout = useServerFn(createCheckout);
   const persistProgress = useServerFn(saveProgress);
 
   useEffect(() => {
@@ -63,6 +65,24 @@ function MaterialDetail() {
   }, [id]);
 
   useTrackView(m?.id, user?.id);
+
+  // Volta do checkout do Mercado Pago: revalida o acesso algumas vezes até o webhook confirmar.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const status = new URLSearchParams(window.location.search).get("pagamento");
+    if (!status) return;
+    if (status === "falha") { toast.error("Pagamento não concluído."); return; }
+    toast.info("Confirmando seu pagamento...");
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries += 1;
+      await refreshAccess();
+      if (tries >= 6) clearInterval(timer);
+    }, 4000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
 
   const { likes, liked, toggle, busy } = useMaterialLike(id, m?.likes ?? 0);
 
@@ -138,18 +158,22 @@ function MaterialDetail() {
     if (!user) { toast.error("Faça login para continuar"); nav({ to: "/auth" }); return; }
     setBuying(true);
     try {
-      const res = await acquire({ data: { materialId: id } });
+      const res = await checkout({ data: { materialId: id, origin: window.location.origin } });
       if (res.status === "pago") {
         toast.success(`Material liberado! Licença ${res.license}`);
         await refreshAccess();
+      } else if (res.url) {
+        toast.info("Redirecionando para o pagamento (Pix ou cartão)...");
+        window.location.href = res.url;
       } else if (res.status === "pendente") {
-        toast.info("Compra registrada como pendente. O acesso é liberado assim que o pagamento for confirmado.");
+        toast.info("Compra pendente. O acesso é liberado assim que o pagamento for confirmado.");
       }
     } catch (e: any) {
-      toast.error("Não foi possível registrar a aquisição");
+      toast.error("Não foi possível iniciar a compra");
       console.error(e);
     } finally { setBuying(false); }
   };
+
 
   if (loading) return (
     <div className="min-h-screen"><Header /><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></div>
