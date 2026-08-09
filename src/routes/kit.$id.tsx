@@ -55,15 +55,19 @@ function KitPage() {
     if (!user) { void nav({ to: "/auth" }); return; }
     setBuying(true);
     try {
-      const res = await buyKit({ data: { kitId: id } });
+      const res = await buyKit({ data: { kitId: id, origin: window.location.origin } });
       if (res.status === "pago") toast.success("Kit liberado! Ele já está na sua biblioteca.");
       else if (res.status === "autor") toast.info("Este kit é seu.");
-      else toast.info("Compra registrada como pendente. Assim que o pagamento for confirmado o acesso é liberado.");
+      else if (res.url) {
+        toast.info("Redirecionando para o pagamento (Pix ou cartão)...");
+        window.location.href = res.url;
+      } else toast.info("Compra pendente. Assim que o pagamento for confirmado o acesso é liberado.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível concluir agora.");
     }
     setBuying(false);
   }
+
 
   if (loading) {
     return (
