@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { getKit, acquireKit, type KitDetail } from "@/lib/kits.functions";
+import { getKit, type KitDetail } from "@/lib/kits.functions";
+import { createCheckout } from "@/lib/checkout.functions";
 import { KitBadge, ContentTypeBadge, TagChips, DifficultyBadge, LevelBadge } from "@/components/ContentTags";
 import { TeacherBadge } from "@/components/TeacherBadge";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -32,7 +33,7 @@ function KitPage() {
   const { user } = useAuth();
   const nav = useNavigate();
   const fetchKit = useServerFn(getKit);
-  const buyKit = useServerFn(acquireKit);
+  const buyKit = useServerFn(createCheckout);
   const [data, setData] = useState<KitDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
