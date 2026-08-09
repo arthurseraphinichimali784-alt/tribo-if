@@ -1,0 +1,2 @@
+UPDATE public.platform_settings SET platform_fee_percent = 15 WHERE id = true;
+INSERT INTO public.platform_settings (id, platform_fee_percent) SELECT true, 15 WHERE NOT EXISTS (SELECT 1 FROM public.platform_settings WHERE id = true);
