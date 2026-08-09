@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { useMaterialLike } from "@/hooks/useMaterialLike";
 import { useTrackView } from "@/hooks/useTrackView";
 import { useMaterialAccess, fetchProtectedFile } from "@/hooks/useMaterialAccess";
-import { acquireMaterial, saveProgress } from "@/lib/purchases.functions";
+import { saveProgress } from "@/lib/purchases.functions";
+import { createCheckout } from "@/lib/checkout.functions";
+
 import { subjectLabel, typeLabel } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TeacherBadge } from "@/components/TeacherBadge";
