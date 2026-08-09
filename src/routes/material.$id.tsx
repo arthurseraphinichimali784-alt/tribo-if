@@ -138,18 +138,22 @@ function MaterialDetail() {
     if (!user) { toast.error("Faça login para continuar"); nav({ to: "/auth" }); return; }
     setBuying(true);
     try {
-      const res = await acquire({ data: { materialId: id } });
+      const res = await checkout({ data: { materialId: id, origin: window.location.origin } });
       if (res.status === "pago") {
         toast.success(`Material liberado! Licença ${res.license}`);
         await refreshAccess();
+      } else if (res.url) {
+        toast.info("Redirecionando para o pagamento (Pix ou cartão)...");
+        window.location.href = res.url;
       } else if (res.status === "pendente") {
-        toast.info("Compra registrada como pendente. O acesso é liberado assim que o pagamento for confirmado.");
+        toast.info("Compra pendente. O acesso é liberado assim que o pagamento for confirmado.");
       }
     } catch (e: any) {
-      toast.error("Não foi possível registrar a aquisição");
+      toast.error("Não foi possível iniciar a compra");
       console.error(e);
     } finally { setBuying(false); }
   };
+
 
   if (loading) return (
     <div className="min-h-screen"><Header /><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></div>
