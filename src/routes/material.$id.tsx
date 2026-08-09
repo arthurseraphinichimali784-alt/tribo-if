@@ -40,7 +40,7 @@ function MaterialDetail() {
   const blobRef = useRef<string | null>(null);
 
   const { access, loading: accessLoading, refresh: refreshAccess } = useMaterialAccess(id);
-  const acquire = useServerFn(acquireMaterial);
+  const checkout = useServerFn(createCheckout);
   const persistProgress = useServerFn(saveProgress);
 
   useEffect(() => {
