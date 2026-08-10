@@ -119,9 +119,14 @@ function MaterialDetail() {
   // Progresso salvo
   useEffect(() => {
     if (!user || !access?.hasAccess) return;
-    supabase.from("material_progress").select("progress_percent,last_page").eq("user_id", user.id).eq("material_id", id).maybeSingle()
-      .then(({ data }) => { if (data?.last_page) setPage(data.last_page); });
-    void persistProgress({ data: { materialId: id, page: 0, percent: 0 } }).catch(() => {});
+    void supabase.from("material_progress").select("progress_percent,last_page").eq("user_id", user.id).eq("material_id", id).maybeSingle()
+      .then(({ data }) => {
+        if (data?.last_page) setPage(data.last_page);
+        // Mantém o progresso já salvo — apenas registra o acesso mais recente.
+        void persistProgress({
+          data: { materialId: id, page: data?.last_page ?? 0, percent: data?.progress_percent ?? 0 },
+        }).catch(() => {});
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, access?.hasAccess, id]);
 
