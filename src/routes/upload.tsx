@@ -17,8 +17,12 @@ import { UploadCloud, FileText, X, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/upload")({ component: UploadPage });
 
-const subjectValues = SUBJECTS.map((s) => s.value) as [string, ...string[]];
-const typeValues = MATERIAL_TYPES.map((t) => t.value) as [string, ...string[]];
+const subjectValues = SUBJECTS.map((s) => s.value) as [
+  (typeof SUBJECTS)[number]["value"], ...(typeof SUBJECTS)[number]["value"][]
+];
+const typeValues = MATERIAL_TYPES.map((t) => t.value) as [
+  (typeof MATERIAL_TYPES)[number]["value"], ...(typeof MATERIAL_TYPES)[number]["value"][]
+];
 
 const schema = z.object({
   title: z.string().trim().min(3).max(120),
