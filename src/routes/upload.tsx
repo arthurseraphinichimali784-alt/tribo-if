@@ -17,11 +17,18 @@ import { UploadCloud, FileText, X, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/upload")({ component: UploadPage });
 
+const subjectValues = SUBJECTS.map((s) => s.value) as [
+  (typeof SUBJECTS)[number]["value"], ...(typeof SUBJECTS)[number]["value"][]
+];
+const typeValues = MATERIAL_TYPES.map((t) => t.value) as [
+  (typeof MATERIAL_TYPES)[number]["value"], ...(typeof MATERIAL_TYPES)[number]["value"][]
+];
+
 const schema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().max(1000).optional(),
-  subject: z.enum(["matematica","fisica","quimica","biologia","portugues","geografia","historia","ingles"]),
-  type: z.enum(["resumo","flashcards","mapa_mental","lista_exercicios","simulado","outro"]),
+  subject: z.enum(subjectValues),
+  type: z.enum(typeValues),
   difficulty: z.enum(["facil","medio","dificil"]),
   price: z.number().min(0).max(9999),
   topics: z.array(z.string().trim().min(2).max(30)).max(5),
