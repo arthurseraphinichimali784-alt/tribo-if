@@ -98,7 +98,8 @@ export function CommentThread({ materialId, materialAuthorId }: { materialId: st
 
   const togglePin = async (c: CommentRow) => {
     if (user?.id !== materialAuthorId) return;
-    await supabase.from("comments").update({ is_pinned: !c.is_pinned }).eq("id", c.id);
+    const { error } = await supabase.rpc("toggle_comment_pin", { _comment_id: c.id, _pinned: !c.is_pinned });
+    if (error) toast.error("Não foi possível destacar o comentário");
   };
 
   const roots = [...items.filter((c) => !c.parent_id)].sort((a, b) => relevance(b) - relevance(a));
