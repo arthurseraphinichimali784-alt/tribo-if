@@ -1530,6 +1530,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      toggle_comment_pin: {
+        Args: { _comment_id: string; _pinned: boolean }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student"
