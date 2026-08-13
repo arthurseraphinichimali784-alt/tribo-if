@@ -56,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setAnalyticsUser(s?.user?.id ?? null);
-      writeSessionCookie(event === "SIGNED_OUT" ? null : s);
+      if (event === "SIGNED_OUT") writeSessionCookie(null);
+      else if (s) writeSessionCookie(s);
       if (event === "SIGNED_OUT") setReady(true);
     });
 
